@@ -35,3 +35,7 @@ class Resetcode(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     code = models.CharField(max_length=200)
     is_expired = models.BooleanField(default=False)
+
+
+
+
