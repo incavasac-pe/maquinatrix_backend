@@ -3,9 +3,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import *
 
-import secrets
-import random
-from rest_framework.response import Response
+
 
 class AddCompanySerializer(serializers.Serializer):
     rut = serializers.CharField(required=True)
@@ -46,13 +44,10 @@ class AddIndividualSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    # id=serializers.IntegerField()
+
     class Meta:
         model = User
-        # title = serializers.CharField(max_length=100)
-        # author = serializers.CharField(max_length=100)
-        # email = serializers.EmailField(max_length=100)
-        # date = serializers .DateTimeField()
+
         fields = '__all__'
 
 
@@ -60,43 +55,34 @@ class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=50, required=True)
     password = serializers.CharField(max_length=50, required=True)
 
-    # if Company.objects.filter(is_email_verified=False).exists():
-    #     raise serializers.ValidationError("Duplicate email enter another email")
-
 #
-class RandomCodeSerializer(serializers.Serializer):
-    code = serializers.CharField(max_length=4)
-
-    def create(self, validated_data):
-        validated_data['code'] = str(secrets.randbelow(10000)).zfill(4)
-        return super().create(validated_data)
-
-
 
 class SendCodeSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=50, required=True)
 
 
 
-    # def generate_code():
-    #     return str(random.randint(1000, 9999))
+
 class UserSerializer(serializers.ModelSerializer):
-    # id=serializers.IntegerField()
     class Meta:
         model = User
-        # title = serializers.CharField(max_length=100)
-        # author = serializers.CharField(max_length=100)
-        # email = serializers.EmailField(max_length=100)
-        # date = serializers .DateTimeField()
         fields = '__all__'
 
 
-# class ResetpasswordSerializer(serializers.ModelSerializer):
-#     # id=serializers.IntegerField()
-#     class Meta:
-#         model = Resetcode
-#         # title = serializers.CharField(max_length=100)
-#         # author = serializers.CharField(max_length=100)
-#         # email = serializers.EmailField(max_length=100)
-#         # date = serializers .DateTimeField()
-#         fields = '__all__'
+class  ChangePasswordSerializer(serializers.ModelSerializer):
+    code = serializers.IntegerField(required=True)
+    is_expired = serializers.CharField(required=True)
+
+class getcompanySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Company
+
+        fields = '__all__'
+
+class GetIndividualSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Individual
+
+        fields = '__all__'

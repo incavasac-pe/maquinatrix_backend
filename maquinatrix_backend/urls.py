@@ -23,7 +23,9 @@ urlpatterns = [
     path('register/', Registration.as_view()),
     path('login/', ClassLoginApi.as_view()),
     path('verify_email/', VerifyEmail.as_view()),
-    path('send_code/', Sendcode.as_view()),
+    path('send_code/', SendCode.as_view()),
+    path('change_password/', ChangePassword.as_view()),
+    path('get_user/', GetUserdata.as_view()),
 
 
 ]
