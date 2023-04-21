@@ -2,10 +2,6 @@
 maquinatrix_venv/*
 maq_env/*
 migrations/*
-
 users/__pycache__/*
 users/migrations/*
-
-
-
-maquinatrix_backend/*
+#maquinatrix_backend/*
