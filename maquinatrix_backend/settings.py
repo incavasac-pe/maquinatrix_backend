@@ -11,9 +11,15 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-
+from django.conf import settings
+from django.urls import include, path
+import os
+from django.conf.urls.static import static
+from django.urls import URLPattern, URLResolver
+from django.urls import include, path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+MEDIA_ROOT = os.path.join(BASE_DIR, "images")
 
 
 # Quick-start development settings - unsuitable for production
@@ -24,6 +30,8 @@ SECRET_KEY = 'django-insecure-jojl6o$ey0^ji4=5#@+)o7u-lvc(qi7@y@ar7f9e=a&a(qc4sb
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+if settings.DEBUG:
+  URLPattern = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 ALLOWED_HOSTS = ['*']
 

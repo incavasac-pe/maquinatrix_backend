@@ -20,21 +20,31 @@ class Company(models.Model):
 
 class Individual(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    id_document = models.CharField(max_length=200,choices=DOCUMENT_CHOICES)
-    id_number = models.CharField(max_length=200)
+    id_document = models.CharField(max_length=10,choices=DOCUMENT_CHOICES)
+    id_number = models.CharField(max_length=20)
     birth_date = models.DateTimeField(auto_now=True)
-    first_name = models.CharField(max_length=200)
-    last_name = models.CharField(max_length=200)
-    latitude = models.CharField(max_length=200)
-    longitude = models.CharField(max_length=200)
-    address = models.CharField(max_length=200)
+    first_name = models.CharField(max_length=20)
+    last_name = models.CharField(max_length=20)
+    latitude = models.CharField(max_length=20)
+    longitude = models.CharField(max_length=20)
+    address = models.CharField(max_length=50)
     is_agreed = models.BooleanField(default=False)
     is_email_verified = models.BooleanField(default=False)
+    verification_badge = models.BooleanField(default=False)
 
 class Resetcode(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     code = models.CharField(max_length=200)
     is_expired = models.BooleanField(default=False)
+
+class VerificationInfo(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    document_type = models.CharField(max_length=200)
+    front_pic=models.ImageField(upload_to='images')
+    back_pic=models.ImageField(upload_to='images')
+    is_verified = models.BooleanField(default=False)
+
+
 
 
 
