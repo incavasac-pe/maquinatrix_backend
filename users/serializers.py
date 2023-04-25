@@ -8,7 +8,6 @@ from .models import *
 class AddCompanySerializer(serializers.Serializer):
     rut = serializers.CharField(required=True)
     company_name = serializers.CharField(required=True)
-    is_email_verified = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     user_type = serializers.CharField(required=True)
@@ -27,7 +26,6 @@ class AddIndividualSerializer(serializers.Serializer):
     longitude = serializers.CharField(required=True)
     address = serializers.CharField(required=True)
     is_agreed = serializers.BooleanField(required=True)
-    is_email_verified = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     user_type = serializers.CharField(required=True)
@@ -86,3 +84,26 @@ class GetIndividualSerializer(serializers.ModelSerializer):
         model = Individual
 
         fields = '__all__'
+
+
+class AddVerificationBadgeSerializer(serializers.Serializer):
+    document_type = serializers.CharField(required=True)
+    front_pic = serializers.ImageField(required=True)
+    back_pic = serializers.ImageField(required=False)
+
+
+
+    def validate(self, data):
+        """
+        Check document_type is valid
+        """
+        if data['document_type'] not in ["passport", "id_card"]:
+            raise serializers.ValidationError("document_type must be id_card or passport")
+        return data
+
+class VerificationBadgeResponseSerializer(serializers.Serializer):
+    document_type = serializers.CharField(required=True)
+    front_pic = serializers.ImageField(required=True)
+    back_pic = serializers.ImageField(required=False)
+    is_verified=serializers.BooleanField(required=True)
+

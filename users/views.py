@@ -35,7 +35,7 @@ class Registration(APIView):
                     token = Token.objects.get_or_create(user=user_obj)[0].key
                     company_obj = Company.objects.create(rut=serializer.validated_data['rut'],
                                                          company_name=serializer.validated_data['company_name'],
-                                                         is_email_verified=serializer.validated_data['is_email_verified'],latitude=serializer.validated_data['latitude'],longitude=serializer.validated_data['longitude'],address=serializer.validated_data['address'],user=user_obj)
+                                                         latitude=serializer.validated_data['latitude'],longitude=serializer.validated_data['longitude'],address=serializer.validated_data['address'],user=user_obj)
 
                     subject = "Email verification"
                     message1="maquinatrix"
@@ -96,7 +96,6 @@ class ClassLoginApi(APIView):
     permission_classes = (AllowAny,)
     serializer_class =  LoginSerializer
 
-
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         response = serializer.is_valid(raise_exception=True)
@@ -149,9 +148,6 @@ class VerifyEmail(APIView):
 
     def post(self, request):
         user=request.user
-
-
-
 
         if user.is_staff == True:
 
@@ -213,9 +209,6 @@ class SendCode(APIView):
                 )
 
 
-
-
-
 class ChangePassword(APIView):
     def post(self, request):
         data = request.data
@@ -243,24 +236,47 @@ class GetUserdata(APIView):
 
     permission_classes = (IsAuthenticated,)
     def get(self, request):
-
         user = request.user
-
         if user.is_staff == True:
-            com_obj = Company.objects.filter(user_id=user.id)
             instance = Company.objects.get(user_id=user)
             serializer = getcompanySerializer(instance)
             return Response(serializer.data, status=status.HTTP_200_OK)
-
-
         else :
-            ind_obj = Individual.objects.filter(user_id=user.id)
             instance = Individual.objects.get(user_id=user)
             serializer = GetIndividualSerializer(instance)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
+class VerificationBadge(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        user_id = request.user.id
+        data = request.data
+        serializer = AddVerificationBadgeSerializer(data=data)
+        if serializer.is_valid():
+            if Individual.objects.filter(user_id=user_id).filter(verification_badge=False).exists():
 
 
+                verifcation_obj = VerificationInfo.objects.create(document_type=serializer.validated_data['document_type'],
+                                                 front_pic=serializer.validated_data['front_pic'],back_pic=serializer.validated_data.get('back_pic'),user_id=user_id)
+
+                bagde_profile_serializer = VerificationBadgeResponseSerializer(verifcation_obj)
+                badge_profile_serializer = bagde_profile_serializer.data
+
+                response = {
+                    'badge_info': badge_profile_serializer
+                }
+                return Response(
+                    {"status_code": status.HTTP_201_CREATED, "success": True,
+                     "data": response})
+
+            else:
+                return Response(
+                    {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "document already verified"})
+
+
+        else:
+            return Response(
+                {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "invalid payload"})
 
 
 
