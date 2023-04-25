@@ -107,3 +107,8 @@ class VerificationBadgeResponseSerializer(serializers.Serializer):
     back_pic = serializers.ImageField(required=False)
     is_verified=serializers.BooleanField(required=True)
 
+class ChangePasswordSerializer(serializers.Serializer):
+    model = User
+
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
