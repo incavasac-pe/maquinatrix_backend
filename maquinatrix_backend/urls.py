@@ -27,6 +27,7 @@ urlpatterns = [
     path('change_password/', ChangePassword.as_view()),
     path('get_user/', GetUserdata.as_view()),
     path('verification_badge/', VerificationBadge.as_view()),
+    path('update_password/', ChangePasswordView.as_view()),
 
 
 

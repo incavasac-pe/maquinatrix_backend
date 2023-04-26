@@ -269,6 +269,7 @@ class VerificationBadge(APIView):
                     {"status_code": status.HTTP_201_CREATED, "success": True,
                      "data": response})
 
+
             else:
                 return Response(
                     {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "document already verified"})
@@ -279,4 +280,27 @@ class VerificationBadge(APIView):
                 {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "invalid payload"})
 
 
+class ChangePasswordView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = ChangePasswordSerializer
+    def post(self, request):
+        self.object = self.get_object()
+        serializer = self. serializer_class(data=request.data)
 
+        if serializer.is_valid():
+            # Check old password
+            if not self.object.check_password(serializer.data.get("old_password")):
+                return Response( {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "incorect old password"})
+            # set_password also hashes the password that the user will get
+            self.object.set_password(serializer.data.get("new_password"))
+            self.object.save()
+
+
+            return Response(
+                {"status_code": status.HTTP_200_OK, "success": True, "message": "user password updated", })
+
+        return Response({"status_code": status.HTTP_400_BAD_REQUEST,"success": False,"errors": {"old_password": ["Wrong password."]}})
+
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
