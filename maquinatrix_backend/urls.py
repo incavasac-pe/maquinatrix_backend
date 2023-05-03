@@ -22,13 +22,15 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/', Registration.as_view()),
     path('login/', ClassLoginApi.as_view()),
-    path('verify_email/', VerifyEmail.as_view()),
-    path('send_code/', SendCode.as_view()),
-    path('change_password/', ChangePassword.as_view()),
-    path('get_user/', GetUserdata.as_view()),
-    path('verification_badge/', VerificationBadge.as_view()),
-    path('update_password/', ChangePasswordView.as_view()),
-
-
-
+    path('verify-email/', VerifyEmail.as_view()),
+    path('send-code/', SendCode.as_view()),
+    path('change-password/', ChangePassword.as_view()),
+    path('get-user/', GetUserdata.as_view()),
+    path('verification-badge/', VerificationBadgeView.as_view()),
+    path('update-password/', ChangePasswordView.as_view()),
+    path('update-dob/', UpdateIndividualDobView.as_view()),
+    path('update-address/', UpdateAddressView.as_view()),
+    path('update-email/', UpdateEmailView.as_view()),
+    path('update-individual-info/', UpdateIndividualInfoView.as_view()),
+    path('update-company-name/', UpdateIndividualCompanyNameView.as_view()),
 ]

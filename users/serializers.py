@@ -1,8 +1,9 @@
-
+from django.utils import timezone
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import *
-
+from django.core.exceptions import ValidationError
+from django.utils.dateparse import parse_date
 
 
 class AddCompanySerializer(serializers.Serializer):
@@ -16,11 +17,12 @@ class AddCompanySerializer(serializers.Serializer):
     address = serializers.CharField(required=True)
     is_agreed = serializers.BooleanField(required=True)
 
+
 class AddIndividualSerializer(serializers.Serializer):
     id_document = serializers.CharField(required=True)
     id_number = serializers.CharField(required=True)
     birth_date = serializers.CharField(required=True)
-    first_name =serializers.CharField(required=True)
+    first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
     latitude = serializers.CharField(required=True)
     longitude = serializers.CharField(required=True)
@@ -29,12 +31,8 @@ class AddIndividualSerializer(serializers.Serializer):
     password = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     user_type = serializers.CharField(required=True)
+    document_no = serializers.IntegerField(required=True)
 
-    def validate_email(self, value):
-        lower_email = value.lower()
-        if User.objects.filter(email__iexact=lower_email).exists():
-            raise serializers.ValidationError("Duplicate email enter another email")
-        return lower_email
 
     class Meta:
         model = User
@@ -53,12 +51,9 @@ class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=50, required=True)
     password = serializers.CharField(max_length=50, required=True)
 
-#
 
 class SendCodeSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=50, required=True)
-
-
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -67,21 +62,29 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class  ChangePasswordSerializer(serializers.ModelSerializer):
+class ChangePasswordSerializer(serializers.ModelSerializer):
     code = serializers.IntegerField(required=True)
     is_expired = serializers.CharField(required=True)
 
-class getcompanySerializer(serializers.ModelSerializer):
+
+class CompanySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Company
-
         fields = '__all__'
 
-class GetIndividualSerializer(serializers.ModelSerializer):
+
+class IndividualSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Individual
+        fields = '__all__'
+
+
+class GetCompanyNameSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Company
 
         fields = '__all__'
 
@@ -90,8 +93,7 @@ class AddVerificationBadgeSerializer(serializers.Serializer):
     document_type = serializers.CharField(required=True)
     front_pic = serializers.ImageField(required=True)
     back_pic = serializers.ImageField(required=False)
-
-
+    user_with_document_pic=serializers.ImageField(required=True)
 
     def validate(self, data):
         """
@@ -101,14 +103,52 @@ class AddVerificationBadgeSerializer(serializers.Serializer):
             raise serializers.ValidationError("document_type must be id_card or passport")
         return data
 
+
 class VerificationBadgeResponseSerializer(serializers.Serializer):
     document_type = serializers.CharField(required=True)
     front_pic = serializers.ImageField(required=True)
     back_pic = serializers.ImageField(required=False)
+    user_with_document_pic=serializers.ImageField(required=False)
     is_verified=serializers.BooleanField(required=True)
+
 
 class ChangePasswordSerializer(serializers.Serializer):
     model = User
 
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
+
+
+class UpdateAdressSerializer(serializers.Serializer):
+
+    latitude = serializers.CharField(required=True)
+    longitude = serializers.CharField(required=True)
+    address = serializers.CharField(required=True)
+
+
+class UpdateDOBSerializer(serializers.Serializer):
+    birth_date = serializers.CharField(required=True)
+
+
+class UpdateEmailSerializer(serializers.Serializer):
+    email_address = serializers.CharField(required=True)
+
+
+class UpdateDataSerializer(serializers.Serializer):
+
+    user_with_document_pic = serializers.ImageField(required=True)
+    full_name = serializers.CharField(required=True)
+    document_type = serializers.CharField(required=True)
+    document_no = serializers.IntegerField(required=True)
+
+    def validate(self, data):
+        """
+        Check document_type is valid
+        """
+        if data['document_type'] not in ["passport", "id_card"]:
+            raise serializers.ValidationError("document_type must be id_card or passport")
+        return data
+
+
+class UpdateCompanyNameSerializer(serializers.Serializer):
+    company_name = serializers.CharField(required=True)
