@@ -35,14 +35,14 @@ class Registration(APIView):
                                                          latitude=serializer.validated_data['latitude'],longitude=serializer.validated_data['longitude'],address=serializer.validated_data['address'],user=user_obj)
                     subject = "Email verification"
 #                     http://localhost:3000/registro_exitoso/
-                    message1="{{token}}".format(token)
+                    message1="www.google.com/{{token}}".format(token)
                     context={'token': token}
                     message = render_to_string('verify_email.html',context)
                     email=data['email']
                     print("html=========",message)
                     recipient_list=[email]
 #                     html_message=message,
-                    send_mail(subject, EMAIL_HOST_USER, message, recipient_list,fail_silently=True)
+                    send_mail(subject, EMAIL_HOST_USER, message1, recipient_list,fail_silently=True)
                     return Response(
                         {"status_code": status.HTTP_201_CREATED, "success": True, "message": "company registered",
                          "data": serializer.data})
