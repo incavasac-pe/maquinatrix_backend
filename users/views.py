@@ -35,7 +35,7 @@ class Registration(APIView):
                                                          latitude=serializer.validated_data['latitude'],longitude=serializer.validated_data['longitude'],address=serializer.validated_data['address'],user=user_obj)
                     subject = "Email verification"
 #                     http://localhost:3000/registro_exitoso/
-                    message1="http://localhost:3000/registro_exitoso/{{token}}".format(token)
+                    message1="http://localhost:3000/registro_exitoso/{token}".format(token)
                     context={'token': token}
                     message = render_to_string('verify_email.html',context)
                     email=data['email']
