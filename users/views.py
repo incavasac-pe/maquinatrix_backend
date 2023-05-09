@@ -38,7 +38,7 @@ class Registration(APIView):
                     context={'token': token}
                     message = render_to_string('verify_email.html',context)
                     email=data['email']
-
+                    print("html=========",message)
                     recipient_list=[email]
                     send_mail(subject, EMAIL_HOST_USER, message1, recipient_list,html_message=message,fail_silently=True)
                     return Response(
