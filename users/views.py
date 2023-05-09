@@ -41,7 +41,8 @@ class Registration(APIView):
                     email=data['email']
                     print("html=========",message)
                     recipient_list=[email]
-                    send_mail(subject, EMAIL_HOST_USER, message1, recipient_list,html_message=message,fail_silently=True)
+#                     html_message=message,
+                    send_mail(subject, EMAIL_HOST_USER, message1, recipient_list,fail_silently=True)
                     return Response(
                         {"status_code": status.HTTP_201_CREATED, "success": True, "message": "company registered",
                          "data": serializer.data})
