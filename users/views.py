@@ -34,7 +34,7 @@ class Registration(APIView):
                                                          company_name=serializer.validated_data['company_name'],
                                                          latitude=serializer.validated_data['latitude'],longitude=serializer.validated_data['longitude'],address=serializer.validated_data['address'],user=user_obj)
                     subject = "Email verification"
-                    message1="maquinatrix"
+                    message1="http://localhost:3000/registro_exitoso/{{token}}".format(token)
                     context={'token': token}
                     message = render_to_string('verify_email.html',context)
                     email=data['email']
