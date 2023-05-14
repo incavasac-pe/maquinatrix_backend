@@ -39,9 +39,7 @@ class Registration(APIView):
                     context={'token': token}
                     message = render_to_string('verify_email.html',context)
                     email=data['email']
-                    print("html=========",message)
                     recipient_list=[email]
-#                     html_message=message,
                     send_mail(subject, message1, EMAIL_HOST_USER, recipient_list,fail_silently=True)
                     return Response(
                         {"status_code": status.HTTP_201_CREATED, "success": True, "message": "company registered",
@@ -66,11 +64,11 @@ class Registration(APIView):
                     user_obj.save()
                     token = Token.objects.get_or_create(user=user_obj)[0].key
                     Individual.objects.create(id_document=serializer.validated_data['id_document'],
-                                                        id_number=serializer.validated_data['id_number'],
                                                         birth_date=serializer.validated_data['birth_date'],
                                                         first_name=serializer.validated_data['first_name'],
                                                         last_name=serializer.validated_data['last_name'],
                                                         latitude=serializer.validated_data['latitude'],
+                                                        is_agreed=serializer.validated_data['is_agreed'],
                                                         longitude=serializer.validated_data['longitude'],
                                                         address=serializer.validated_data['address'],
                                                         document_no=serializer.validated_data['document_no'],
@@ -151,11 +149,10 @@ class VerifyEmail(APIView):
 
     def post(self, request):
         user_id = request.user.id
-        user=request.user
+        user = request.user
         token = Token.objects.get_or_create(user=user_id)[0].key
-        Token.objects.filter(user_id=user_id)
         if UpdateEmail.objects.filter(token=token).exists():
-            if user.is_staff == True:
+            if user.is_staff:
                 obj = Company.objects.filter(user_id=user.id).last()
                 if obj.is_email_verified:
                     Company.objects.filter(user_id=user.id).update(is_email_verified=True)
@@ -163,6 +160,7 @@ class VerifyEmail(APIView):
                     updated_email = update_email_obj.email_address
                     User.objects.filter(id=user_id).update(email=updated_email, username=updated_email)
                     UpdateEmail.objects.filter(token=token).delete()
+                    Token.objects.filter(user=user_id).delete()
                     return Response(
                     {"status_code": status.HTTP_200_OK, "success": True, "message": "email verified"})
                 else:

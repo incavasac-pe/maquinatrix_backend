@@ -21,10 +21,10 @@ class Company(models.Model):
     address = models.CharField(max_length=200)
     is_agreed = models.BooleanField(default=False)
 
+
 class Individual(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     id_document = models.CharField(max_length=10,choices=DOCUMENT_CHOICES)
-    id_number = models.CharField(max_length=20)
     birth_date = models.DateField(auto_now=False,null=True)
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
@@ -43,6 +43,7 @@ class Resetcode(models.Model):
     code = models.CharField(max_length=200)
     is_expired = models.BooleanField(default=False)
 
+
 class VerificationInfo(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,unique=True)
     document_type = models.CharField(max_length=200)
@@ -51,10 +52,17 @@ class VerificationInfo(models.Model):
     user_with_document_pic=models.ImageField(upload_to='images',null=True)
     is_verified = models.BooleanField(default=False)
 
+
 class UpdateEmail(models.Model):
 
     token = models.CharField(max_length=200,null=False,unique=True)
     email_address = models.CharField(max_length=200,null=False)
+
+
+
+
+
+
 
 
 

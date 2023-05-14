@@ -20,7 +20,6 @@ class AddCompanySerializer(serializers.Serializer):
 
 class AddIndividualSerializer(serializers.Serializer):
     id_document = serializers.CharField(required=True)
-    id_number = serializers.CharField(required=True)
     birth_date = serializers.CharField(required=True)
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
@@ -152,3 +151,5 @@ class UpdateDataSerializer(serializers.Serializer):
 
 class UpdateCompanyNameSerializer(serializers.Serializer):
     company_name = serializers.CharField(required=True)
+
+
