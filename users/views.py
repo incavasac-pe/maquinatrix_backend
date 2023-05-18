@@ -1,7 +1,8 @@
 from django.contrib.auth import authenticate
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework import status
+
 from rest_framework.views import APIView
+from maquinatrix_backend import services
 from users.serializers import *
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -11,17 +12,20 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.template.loader import  render_to_string
 from maquinatrix_backend.settings import EMAIL_HOST_USER
+from rest_framework import status
 
 
 class Registration(APIView):
     permission_classes = (AllowAny,)
 
     def post( self,request):
+
         data = request.data
         if data['user_type'] not in ["company","individual"]:
             return Response(
-                {"status_code": status.HTTP_400_BAD_REQUEST, "success": False,"message": "user_type must be company or individual"})
-
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="User type must be company or individual"),
+                status=status.HTTP_400_BAD_REQUEST)
         if data['user_type'] == "company":
             serializer = AddCompanySerializer(data=data)
             if serializer.is_valid():
@@ -31,8 +35,11 @@ class Registration(APIView):
                     user_obj.save()
                     token = Token.objects.get_or_create(user=user_obj)[0].key
                     Company.objects.create(rut=serializer.validated_data['rut'],
-                                                         company_name=serializer.validated_data['company_name'],
-                                                         latitude=serializer.validated_data['latitude'],longitude=serializer.validated_data['longitude'],address=serializer.validated_data['address'],user=user_obj)
+                                           profile_pic=serializer.validated_data['profile_pic'],
+                                           company_name=serializer.validated_data['company_name'],
+                                           latitude=serializer.validated_data['latitude'],
+                                           longitude=serializer.validated_data['longitude'],
+                                           address=serializer.validated_data['address'],user=user_obj)
                     subject = "Email verification"
                     message1="maquinatrix"
                     context={'token': token}
@@ -42,16 +49,20 @@ class Registration(APIView):
                     recipient_list=[email]
                     send_mail(subject, EMAIL_HOST_USER, message1, recipient_list,html_message=message,)
                     return Response(
-                        {"status_code": status.HTTP_201_CREATED, "success": True, "message": "company registered",
-                         "data": serializer.data})
+                        services.success_response(status_code=status.HTTP_201_CREATED, data=serializer.data,
+                                                  msg='User Registered Successfully'), status=status.HTTP_201_CREATED)
                 else:
                     return Response(
-                        {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "Email Already Exists"})
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="Email Already Exists"),
+                        status=status.HTTP_400_BAD_REQUEST)
 
             else:
                 return Response(
-                {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "Invalid Payload",
-                 'errors': serializer.errors})
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Invalid Payload", errors=serializer.errors),
+                    status=status.HTTP_400_BAD_REQUEST)
+
 
         else:
             serializer = AddIndividualSerializer(data=data)
@@ -83,17 +94,19 @@ class Registration(APIView):
                     recipient_list = [email]
                     send_mail(subject, EMAIL_HOST_USER, message1, recipient_list, html_message=message, fail_silently=True)
                     return Response(
-                        {"status_code": status.HTTP_201_CREATED, "success": True, "message": "individual registered",
-                         "data": serializer.data})
-
+                        services.success_response(status_code=status.HTTP_201_CREATED, data=serializer.data,
+                                                  msg='User Registered Successfully'), status=status.HTTP_201_CREATED,)
                 else:
                     return Response(
-                        {"status_code": status.HTTP_400_BAD_REQUEST, "success": False,
-                         "message": "Email Already Exists"})
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="Email Already Exists"),
+                        status=status.HTTP_400_BAD_REQUEST)
             else:
-                 return Response(
-                 {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "Invalid Payload"
-                                                                                           ,"errors":serializer.errors})
+                return Response(
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Invalid Payload", errors=serializer.errors),
+                    status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class ClassLoginApi(APIView):
@@ -103,16 +116,15 @@ class ClassLoginApi(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         response = serializer.is_valid(raise_exception=True)
-        return self.on_valid_request_data(serializer.validated_data, request)
+        return self.on_valid_request_data(serializer.validated_data, response)
 
     def on_valid_request_data(self, data, request):
-        # username = data.get('username')
         email = data.get('email')
         password = data.get('password')
         user_obj = User.objects.filter(email=email).last()
 
         if user_obj:
-            if user_obj.is_staff == True:
+            if user_obj.is_staff:
                 obj = Company.objects.filter(user_id=user_obj.id).last()
             else:
                 obj = Individual.objects.filter(user_id=user_obj.id).last()
@@ -128,20 +140,28 @@ class ClassLoginApi(APIView):
                         'user_profile': user_profile_serializer
                     }
                     return Response(
-                        {"status_code": status.HTTP_200_OK, "success": True, "message": "user login success",
-                         "data": response})
+                        services.success_response(status_code=status.HTTP_200_OK, data=response,
+                                              msg='User login Successfully'), status=status.HTTP_200_OK)
+
 
                 else:
                     return Response(
-                    {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message":"Credentials not valid"})
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="Invalid Payload", errors=self.serializer_class.errors),
+                        status=status.HTTP_400_BAD_REQUEST)
 
             else:
                 return Response(
-                    {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "Please verify your email"})
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Please verify your email"),
+                    status=status.HTTP_400_BAD_REQUEST)
+
 
         else:
             return Response(
-                {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "user login fail"})
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="User login fail"),
+                status=status.HTTP_400_BAD_REQUEST)
 
 
 class VerifyEmail(APIView):
@@ -162,10 +182,13 @@ class VerifyEmail(APIView):
                     UpdateEmail.objects.filter(token=token).delete()
                     Token.objects.filter(user=user_id).delete()
                     return Response(
-                    {"status_code": status.HTTP_200_OK, "success": True, "message": "email verified"})
+                        services.success_response(status_code=status.HTTP_200_OK,
+                                                  msg='Email verified'), status=status.HTTP_200_OK )
                 else:
                     return Response(
-                        {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "link expired"})
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="link expired"),
+                        status=status.HTTP_400_BAD_REQUEST)
             else:
                 update_email_obj = UpdateEmail.objects.get(token=token)
                 updated_email = update_email_obj.email_address
@@ -174,28 +197,36 @@ class VerifyEmail(APIView):
                 UpdateEmail.objects.filter(token=token).delete()
 
                 return Response(
-                    {"status_code": status.HTTP_200_OK, "success": False, "message": "User updated"})
-
+                    services.success_response(status_code=status.HTTP_200_OK,
+                                              msg='User updated'), status=status.HTTP_200_OK)
         else:
             if user.is_staff:
                 obj = Company.objects.filter(user_id=user.id).last()
                 if obj.is_email_verified:
 
                     return Response(
-                        {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "link expired"})
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="link expired"),
+                        status=status.HTTP_400_BAD_REQUEST)
+
                 else:
                     Company.objects.filter(user_id=user.id).update(is_email_verified=True)
                 return Response(
-                    {"status_code": status.HTTP_200_OK, "success": True, "message": "email verified"})
+                    services.success_response(status_code=status.HTTP_200_OK,
+                                              msg='email verified'), status=status.HTTP_200_OK)
+
             else:
                 obj = Individual.objects.filter(user_id=user.id).last()
                 if obj.is_email_verified:
                     return Response(
-                        {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "link expired"})
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="link expired"),
+                        status=status.HTTP_400_BAD_REQUEST)
                 else:
                     Individual.objects.filter(user_id=user.id).update(is_email_verified=True)
                     return Response(
-                        {"status_code": status.HTTP_200_OK, "success": True, "message": "email verified"})
+                        services.success_response(status_code=status.HTTP_200_OK,
+                                                  msg='Email verified'), status=status.HTTP_200_OK)
 
 
 class SendCode(APIView):
@@ -226,17 +257,22 @@ class SendCode(APIView):
                 return Response({
                     'code': code,
                     'data': serializer.data,
-                    'message': "your four digit code is created"
-                }, status=status.HTTP_200_OK)
+                    'message': "your four digit code is created",
+                    'status_code': status.HTTP_201_CREATED
+                }, status=status.HTTP_201_CREATED)
             else:
                 return Response(
-                {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "link expired"}
-                )
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="link expired"),
+                    status=status.HTTP_400_BAD_REQUEST)
+
+
         else:
             return Response(
-                {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "Invalid payload",
-                 'errors': serializer.errors}
-            )
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="Invalid payload", errors=serializer.errors),
+                status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class ChangePassword(APIView):
@@ -253,14 +289,19 @@ class ChangePassword(APIView):
                 user.save()
                 reset_obj.first().is_expired = True
                 reset_obj.first().save()
-                return Response({'message': 'Password updated successfully.'}, status=status.HTTP_200_OK)
+                return Response(
+                    services.success_response(status_code=status.HTTP_200_OK,
+                                              msg='Password updated successfully.'), status=status.HTTP_200_OK)
             else:
-                return Response({'error': 'Reset code is invalid or expired.'}, status=status.HTTP_400_BAD_REQUEST)
-
+                return Response(
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Reset code is invalid or expired"),
+                    status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(
-            {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "Invalid payload",
-             'errors': serializer.errors})
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="Invalid payload", errors=serializer.errors),
+                status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetUserdata(APIView):
@@ -270,11 +311,17 @@ class GetUserdata(APIView):
         if user.is_staff:
             instance = Company.objects.get(user_id=user)
             serializer = GetCompanyNameSerializer(instance)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response(
+                services.success_response(status_code=status.HTTP_200_OK, msg="All companies", data=serializer.data)
+                ,status = status.HTTP_200_OK )
+
         else:
             instance = Individual.objects.get(user_id=user)
             serializer = IndividualSerializer(instance)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(
+                services.success_response(status_code=status.HTTP_200_OK, msg="All individuals", data=serializer.data)
+                ,status = status.HTTP_200_OK )
 
 
 class VerificationBadgeView(APIView):
@@ -295,13 +342,15 @@ class VerificationBadgeView(APIView):
                 'badge_info': badge_profile_serializer
             }
             return Response(
-                {"status_code": status.HTTP_201_CREATED, "success": True,
-                 "data": response})
+                services.success_response(status_code=status.HTTP_201_CREATED, msg="Verification Badge created", data=response),
+                status = status.HTTP_201_CREATED)
+
 
         else:
             return Response(
-                {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "invalid payload",
-                 'errors': serializer.errors})
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="Invalid payload", errors=serializer.errors),
+                status=status.HTTP_400_BAD_REQUEST)
 
 
 class ChangePasswordView(APIView):
@@ -313,16 +362,22 @@ class ChangePasswordView(APIView):
 
         if serializer.is_valid():
             if not self.object.check_password(serializer.data.get("old_password")):
-                return Response( {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message":"incorect old password"})
+                return Response(
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Incorrect old password"),
+                    status=status.HTTP_400_BAD_REQUEST)
             self.object.set_password(serializer.data.get("new_password"))
             self.object.save()
 
             return Response(
-                {"status_code": status.HTTP_200_OK, "success": True, "message": "user password updated", })
+                services.success_response(status_code=status.HTTP_200_OK, msg="Password updated"),
+                status=status.HTTP_200_OK)
         else:
             return Response(
-                {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "Invalid payload",
-                 'errors': serializer.errors})
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="Invalid payload", errors=serializer.errors),
+                status=status.HTTP_400_BAD_REQUEST)
+
 
     def get_object(self, queryset=None):
         obj = self.request.user
@@ -348,11 +403,13 @@ class UpdateAddressView(APIView):
                 user_obj = Individual.objects.get(user_id=user_id)
                 response_serializer = IndividualSerializer(user_obj)
             return Response(
-                {"status_code": status.HTTP_200_OK, "success": True, "data": response_serializer.data})
+                services.success_response(status_code=status.HTTP_200_OK, msg="Address Updated",
+                                          data=response_serializer.data,status=status.HTTP_200_OK))
         else:
             return Response(
-                {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "Invalid payload",
-                 'errors': serializer.errors})
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="Invalid payload", errors=serializer.errors),
+                status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateIndividualDobView(APIView):
@@ -366,11 +423,13 @@ class UpdateIndividualDobView(APIView):
             user_obj = Individual.objects.get(user_id=user_id)
             response_serializer = IndividualSerializer(user_obj)
             return Response(
-                {"status_code": status.HTTP_200_OK, "success": True, "data": response_serializer.data})
+                services.success_response(status_code=status.HTTP_200_OK, msg="Individual Date-of-birth updated",
+                                          data=response_serializer.data),status=status.HTTP_200_OK)
         else:
             return Response(
-                {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "Invalid payload",
-                 'errors': serializer.errors})
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="Invalid payload", errors=serializer.errors),
+                status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateEmailView(APIView):
@@ -381,11 +440,10 @@ class UpdateEmailView(APIView):
         if serializer.is_valid():
             if request.user.email == serializer.validated_data['email_address']:
                 return Response(
-                    {"status_code": status.HTTP_400_BAD_REQUEST, "success": False,
-                     "message": "This is your current email"
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="This is your current email"),
+                    status=status.HTTP_400_BAD_REQUEST)
 
-                     }
-                )
             else:
                 token = Token.objects.get_or_create(user=user_id)[0].key
                 if not User.objects.filter(email=serializer.validated_data['email_address']):
@@ -402,18 +460,19 @@ class UpdateEmailView(APIView):
                                   fail_silently=False)
 
                     return Response(
-                            {"status_code": status.HTTP_200_OK, "success": True,"message": "Check your email"})
+                        services.success_response(status_code=status.HTTP_200_OK,
+                                                  msg="Check your email"), status=status.HTTP_200_OK)
                 else:
 
                     return Response(
-                        {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "User with this email"
-                                                                                              " already exist"
-                         }
-                    )
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="User with this email already exist"),
+                        status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(
-                    {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "Invalid payload",
-                     'errors': serializer.errors})
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="Invalid payload", errors=serializer.errors),
+                status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateIndividualInfoView(APIView):
@@ -434,11 +493,13 @@ class UpdateIndividualInfoView(APIView):
             individual_obj = Individual.objects.get(user_id=user_id)
             response_serializer = IndividualSerializer(individual_obj)
             return Response(
-            {"status_code": status.HTTP_200_OK, "success": True,"data": response_serializer.data})
+                services.success_response(status_code=status.HTTP_200_OK, msg="Individual User updated",
+                                          data=response_serializer.data),status=status.HTTP_200_OK)
         else:
             return Response(
-            {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "Invalid payload",
-             'errors': serializer.errors})
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="Invalid payload", errors=serializer.errors),
+                status=status.HTTP_400_BAD_REQUEST)
 
 
 class UpdateIndividualCompanyNameView(APIView):
@@ -454,11 +515,14 @@ class UpdateIndividualCompanyNameView(APIView):
             instance = Company.objects.get(user_id=user_id)
             response_serializer = GetCompanyNameSerializer(instance)
             return Response(
-            {"status_code": status.HTTP_200_OK, "success": True,"data": response_serializer.data})
+                services.success_response(status_code=status.HTTP_200_OK, msg="Company name updated",
+                                          data=response_serializer.data),status=status.HTTP_200_OK)
+
         else:
             return Response(
-                {"status_code": status.HTTP_400_BAD_REQUEST, "success": False, "message": "Invalid payload",
-                 'errors': serializer.errors})
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="Invalid payload", errors=serializer.errors),
+                status=status.HTTP_400_BAD_REQUEST)
 
 
 
