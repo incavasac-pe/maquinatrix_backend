@@ -20,6 +20,7 @@ class Company(models.Model):
     longitude = models.CharField(max_length=200)
     address = models.CharField(max_length=200)
     is_agreed = models.BooleanField(default=False)
+    profile_pic = models.ImageField(upload_to='company profile images', null=True)
 
 
 class Individual(models.Model):

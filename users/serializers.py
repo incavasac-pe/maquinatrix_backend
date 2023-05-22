@@ -18,6 +18,8 @@ class AddCompanySerializer(serializers.Serializer):
     is_agreed = serializers.BooleanField(required=True)
 
 
+
+
 class AddIndividualSerializer(serializers.Serializer):
     id_document = serializers.CharField(required=True)
     birth_date = serializers.CharField(required=True)
@@ -80,7 +82,7 @@ class IndividualSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class GetCompanyNameSerializer(serializers.ModelSerializer):
+class CompanySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Company
@@ -149,7 +151,16 @@ class UpdateDataSerializer(serializers.Serializer):
         return data
 
 
-class UpdateCompanyNameSerializer(serializers.Serializer):
+class UpdateCompanyNameAndRutSerializer(serializers.Serializer):
     company_name = serializers.CharField(required=True)
+    rut = serializers.CharField(required=True)
 
 
+class AddCompanyPicSerializer(serializers.Serializer):
+    profile_pic = serializers.ImageField(required=True)
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = '__all__'
