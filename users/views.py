@@ -47,7 +47,7 @@ class Registration(APIView):
                     message = render_to_string('verify_email.html',context)
                     email=data['email']
                     recipient_list=[email]
-                    send_mail(subject, EMAIL_HOST_USER, message1, recipient_list,html_message=message,)
+                    send_mail(subject, EMAIL_HOST_USER, message1, recipient_list,html_message=message,fail_silently=True)
                     response_serializer = CompanySerializer(company_obj)
                     return Response(
                         services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
