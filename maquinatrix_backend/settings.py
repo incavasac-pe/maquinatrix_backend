@@ -34,7 +34,12 @@ if settings.DEBUG:
   URLPattern = static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
 
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000 ",
+
+]
 
 # Application definition
 
@@ -47,7 +52,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
+     'corsheaders',
 
 
 ]
@@ -56,7 +62,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    # 'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
