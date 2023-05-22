@@ -42,7 +42,8 @@ class Registration(APIView):
                                                        address=serializer.validated_data['address'],user=user_obj)
                     subject = "Email verification"
 #                     http://localhost:3000/registro_exitoso/
-                    message1="http://localhost:3000/registro_exitoso/{token}".format(token=token)
+#                     message1="http://localhost:3000/registro_exitoso/{token}".format(token=token)
+                    message1="maquinatrix"
                     context={'token': token}
                     message = render_to_string('verify_email.html',context)
                     email=data['email']
