@@ -17,14 +17,6 @@ class Year(models.Model):
     year = models.CharField(max_length=30)
 
 
-class Transmission(models.Model):
-    name = models.CharField(max_length=30)
-
-
-class Fuel(models.Model):
-    name = models.CharField(max_length=30)
-
-
 class Label(models.Model):
     name = models.CharField(max_length=30)
     price = models.CharField(max_length=30)
@@ -99,36 +91,36 @@ class Product(models.Model):
     description = models.TextField()
     product_label = models.ForeignKey(Label, on_delete=models.CASCADE)
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
-    title = models.TextField()
+    title = models.CharField(max_length=50)
 
 
 class Condition(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     product_condition = models.CharField(max_length=30)
-    hours_used = models.CharField(max_length=30)
+    hours_used = models.CharField(max_length=10)
     km_run = models.CharField(max_length=30)
 
 
 class Insurance(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    file = models.ImageField(upload_to='Insuranceimages')
+    file = models.ImageField(upload_to='insurance-images')
 
 
 class Certificate(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     date = models.DateField()
-    file = models.ImageField(upload_to='certificateimages')
+    file = models.ImageField(upload_to='certificate-images')
 
 
 class RentInfo(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     hourly_rate = models.FloatField(max_length=20)
     minimum_hours = models.IntegerField()
-    detailed=models.BooleanField(null=True)
-    dispatch_included = models.BooleanField(default=False)
-    operator_included = models.BooleanField(default=False)
-    maq_lease_contract = models.BooleanField(default=False)
-    lease_guaranteed_condition_checklist = models.BooleanField(default=False)
+    detailed=models.BooleanField()
+    dispatch_included = models.BooleanField()
+    operator_included = models.BooleanField()
+    maq_lease_contract = models.BooleanField()
+    lease_guaranteed_condition_checklist = models.BooleanField()
     percentage_amount = models.IntegerField()
     percentage = models.IntegerField()
 
@@ -148,6 +140,6 @@ class RentDetailed(models.Model):
 
 class ProductImages(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    product_pics = models.ImageField(upload_to='productimages')
+    product_pics = models.ImageField(upload_to='product-images')
 
 

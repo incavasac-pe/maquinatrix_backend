@@ -579,20 +579,7 @@ class CreateProduct(APIView):
                                               msg="category_id does not present", ),
                     status=status.HTTP_400_BAD_REQUEST)
 
-
-
             if product_name_obj == "rent" and category_name_obj == "machine and vehicles":
-
-                # region_id_obj1 = Region.objects.filter(id=region_id).exists()
-                # if region_id_obj1:
-                #     region_id_obj = region_id
-                # else:
-                #     return Response(
-                #         services.failure_response(status_code=status.HTTP_400_BAD_REQUEST, errors=serializer.errors,
-                #                                   msg="region_id  does not present", ),
-                #         status=status.HTTP_400_BAD_REQUEST)
-
-
                 label_id = serializer.validated_data['product_label_id']
                 label_obj = Label.objects.filter(id=label_id).last()
                 if not label_obj:
@@ -623,7 +610,7 @@ class CreateProduct(APIView):
                                                          supply_included=supply_included,
                                                          product_condition=product_condition,
                                                          has_certificate=has_certificate,
-                                                         region_id=region_id_obj,
+                                                         region_id=region_id,
                                                          has_insurance=has_insurance,
                                                          city_id=city_id,
                                                          description=description,
