@@ -1,13 +1,11 @@
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import  IsAuthenticated
 from rest_framework import status
 from rest_framework.views import APIView
 from product.products_serializers import *
 from rest_framework.response import Response
-from maquinatrix_backend.services import *
 from .models import *
+
 from maquinatrix_backend import services
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework import viewsets, parsers
 
 
 class CreateBrand(APIView):
@@ -836,7 +834,7 @@ class CreateProductCategory(APIView):
             rent_id = rent_obj[0].id
             sale_id = sale_obj[0].id
             ProductCategories.objects.all().delete()
-            for category in sale_catogories:
+            for category in sale_categories :
                 ProductCategories.objects.create(product_type_id=sale_id, name=category)
 
             for category in rent_categories:

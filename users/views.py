@@ -1,8 +1,8 @@
 from django.contrib.auth import authenticate
 from rest_framework.permissions import AllowAny, IsAuthenticated
-
 from rest_framework.views import APIView
 from maquinatrix_backend import services
+from maquinatrix_backend.services import failure_response, success_response
 from users.serializers import *
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -23,23 +23,23 @@ class Registration(APIView):
         data = request.data
         if data['user_type'] not in ["company","individual"]:
             return Response(
-                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                failure_response(status_code=status.HTTP_400_BAD_REQUEST,
                                           msg="User type must be company or individual"),
                 status=status.HTTP_400_BAD_REQUEST)
         if data['user_type'] == "company":
             serializer = AddCompanySerializer(data=data)
             if serializer.is_valid():
                 if not User.objects.filter(email=serializer.validated_data['email'].lower()):
-                    user_obj=User.objects.create_user(email=serializer.validated_data['email'].lower(),username=serializer.validated_data['email'],is_staff=True)
+                    user_obj=User.objects.create_user(email=serializer.validated_data['email'].lower(),
+                                                      username=serializer.validated_data['email'],is_staff=True)
                     user_obj.set_password(serializer.validated_data['password'])
                     user_obj.save()
                     token = Token.objects.get_or_create(user=user_obj)[0].key
-                    Company.objects.create(rut=serializer.validated_data['rut'],
-                                           profile_pic=serializer.validated_data['profile_pic'],
-                                           company_name=serializer.validated_data['company_name'],
-                                           latitude=serializer.validated_data['latitude'],
-                                           longitude=serializer.validated_data['longitude'],
-                                           address=serializer.validated_data['address'],user=user_obj)
+                    company_obj=Company.objects.create(rut=serializer.validated_data['rut'],
+                                                       company_name=serializer.validated_data['company_name'],
+                                                       latitude=serializer.validated_data['latitude'],
+                                                       longitude=serializer.validated_data['longitude'],
+                                                       address=serializer.validated_data['address'],user=user_obj)
                     subject = "Email verification"
                     message1="maquinatrix"
                     context={'token': token}
@@ -48,9 +48,11 @@ class Registration(APIView):
 
                     recipient_list=[email]
                     send_mail(subject, EMAIL_HOST_USER, message1, recipient_list,html_message=message,)
+                    response_serializer = CompanySerializer(company_obj)
                     return Response(
-                        services.success_response(status_code=status.HTTP_201_CREATED, data=serializer.data,
+                        services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
                                                   msg='User Registered Successfully'), status=status.HTTP_201_CREATED)
+
                 else:
                     return Response(
                         services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
@@ -75,15 +77,15 @@ class Registration(APIView):
                     user_obj.save()
                     token = Token.objects.get_or_create(user=user_obj)[0].key
                     Individual.objects.create(id_document=serializer.validated_data['id_document'],
-                                                        birth_date=serializer.validated_data['birth_date'],
-                                                        first_name=serializer.validated_data['first_name'],
-                                                        last_name=serializer.validated_data['last_name'],
-                                                        latitude=serializer.validated_data['latitude'],
-                                                        is_agreed=serializer.validated_data['is_agreed'],
-                                                        longitude=serializer.validated_data['longitude'],
-                                                        address=serializer.validated_data['address'],
-                                                        document_no=serializer.validated_data['document_no'],
-                                                        user=user_obj)
+                                              birth_date=serializer.validated_data['birth_date'],
+                                              first_name=serializer.validated_data['first_name'],
+                                              last_name=serializer.validated_data['last_name'],
+                                              latitude=serializer.validated_data['latitude'],
+                                              is_agreed=serializer.validated_data['is_agreed'],
+                                              longitude=serializer.validated_data['longitude'],
+                                              address=serializer.validated_data['address'],
+                                              document_no=serializer.validated_data['document_no'],
+                                              user=user_obj)
 
                     subject = "Email verification"
                     message1 = "maquinatrix"
@@ -92,7 +94,7 @@ class Registration(APIView):
                     email = data['email']
 
                     recipient_list = [email]
-                    send_mail(subject, EMAIL_HOST_USER, message1, recipient_list, html_message=message, fail_silently=True)
+                    send_mail(subject, EMAIL_HOST_USER, message1, recipient_list, html_message=message, fail_silently= True)
                     return Response(
                         services.success_response(status_code=status.HTTP_201_CREATED, data=serializer.data,
                                                   msg='User Registered Successfully'), status=status.HTTP_201_CREATED,)
@@ -106,7 +108,6 @@ class Registration(APIView):
                     services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
                                               msg="Invalid Payload", errors=serializer.errors),
                     status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class ClassLoginApi(APIView):
@@ -230,6 +231,7 @@ class VerifyEmail(APIView):
 
 
 class SendCode(APIView):
+    permission_classes = (AllowAny,)
     def post(self, request):
         data = request.data
         serializer = SendCodeSerializer(data=data)
@@ -274,8 +276,9 @@ class SendCode(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class ChangePassword(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request):
         data = request.data
         serializer = ChangePasswordSerializer(data=data)
@@ -310,7 +313,7 @@ class GetUserdata(APIView):
         user = request.user
         if user.is_staff:
             instance = Company.objects.get(user_id=user)
-            serializer = GetCompanyNameSerializer(instance)
+            serializer = CompanySerializer(instance)
 
             return Response(
                 services.success_response(status_code=status.HTTP_200_OK, msg="All companies", data=serializer.data)
@@ -385,6 +388,8 @@ class ChangePasswordView(APIView):
 
 
 class UpdateAddressView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def put(self, request):
         user_id = request.user.id
         serializer = UpdateAdressSerializer(data=request.data)
@@ -413,6 +418,8 @@ class UpdateAddressView(APIView):
 
 
 class UpdateIndividualDobView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def put(self, request):
         user_id = request.user.id
         serializer = UpdateDOBSerializer(data=request.data)
@@ -433,6 +440,8 @@ class UpdateIndividualDobView(APIView):
 
 
 class UpdateEmailView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request):
         data = request.data
         user_id = request.user.id
@@ -476,7 +485,7 @@ class UpdateEmailView(APIView):
 
 
 class UpdateIndividualInfoView(APIView):
-    serializer_class = UpdateDataSerializer
+    permission_classes = (IsAuthenticated,)
 
     def put(self, request):
         user_id = request.user.id
@@ -502,21 +511,22 @@ class UpdateIndividualInfoView(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
 
 
-class UpdateIndividualCompanyNameView(APIView):
-    serializer_class = UpdateCompanyNameSerializer
+class UpdateCompanyNameAndRutView(APIView):
+    permission_classes = (IsAuthenticated,)
 
     def put(self, request):
         user_id = request.user.id
-        serializer = UpdateCompanyNameSerializer(data=request.data)
+        serializer = UpdateCompanyNameAndRutSerializer(data=request.data)
         if serializer.is_valid():
 
             company_name = serializer.validated_data['company_name']
-            Company.objects.filter(user_id=user_id).update(company_name=company_name)
-            instance = Company.objects.get(user_id=user_id)
-            response_serializer = GetCompanyNameSerializer(instance)
+            rut = serializer.validated_data['rut']
+            Company.objects.filter(user_id=user_id).update(company_name=company_name, rut=rut)
+            company_obj = Company.objects.get(user_id=user_id)
+            response_serializer = CompanySerializer(company_obj)
             return Response(
-                services.success_response(status_code=status.HTTP_200_OK, msg="Company name updated",
-                                          data=response_serializer.data),status=status.HTTP_200_OK)
+                services.success_response(status_code=status.HTTP_200_OK, msg="Company name and rut updated",
+                                          data=response_serializer.data), status=status.HTTP_200_OK)
 
         else:
             return Response(
@@ -525,4 +535,25 @@ class UpdateIndividualCompanyNameView(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
 
 
+class UpdateCompanyPicView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def put(self, request):
+        user_id = request.user.id
+        data = request.data
+        serializer = AddCompanyPicSerializer(data=data)
+        if serializer.is_valid():
+            profile_pic = serializer.validated_data['profile_pic']
+            Company.objects.filter(id=user_id).update(profile_pic=profile_pic)
+            company_obj = Company.objects.filter(id=user_id).last()
+            response_serializer = CompanySerializer(company_obj)
+            return Response(
+                services.success_response(status_code=status.HTTP_200_OK, msg="Company pic updated",
+                                          data=response_serializer.data),
+                status=status.HTTP_200_OK)
+        else:
+            return Response(
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="Invalid payload", errors=serializer.errors),
+                status=status.HTTP_400_BAD_REQUEST)
 
