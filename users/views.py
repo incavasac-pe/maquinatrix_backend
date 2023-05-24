@@ -234,10 +234,8 @@ class SendCode(APIView):
     def post(self, request):
         data = request.data
         serializer = SendCodeSerializer(data=data)
-
         if serializer.is_valid():
             if User.objects.filter(email=serializer.validated_data['email']):
-
                 code = random.randint(1000, 9999)
                 user = User.objects.filter(email=serializer.validated_data['email']).last()
                 while True:
@@ -264,7 +262,7 @@ class SendCode(APIView):
             else:
                 return Response(
                     services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                              msg="link expired"),
+                                              msg="User with this email does not exist"),
                     status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -286,7 +284,7 @@ class ChangePassword(APIView):
             reset_obj = Resetcode.objects.filter(code=code)
             if reset_obj.exists() and not reset_obj.first().is_expired:
                 user = reset_obj.first().user
-                password = serializer.validated_data['password']
+                password = serializer.validated_data['new_password']
                 user.set_password(password)
                 user.save()
                 reset_obj.first().is_expired = True
@@ -355,12 +353,11 @@ class VerificationBadgeView(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
 
 
-class ChangePasswordView(APIView):
+class UpdatePasswordView(APIView):
     permission_classes = (IsAuthenticated,)
-    serializer_class = ChangePasswordSerializer
     def post(self, request):
         self.object = self.get_object()
-        serializer = self. serializer_class(data=request.data)
+        serializer = UpdatePasswordSerializer(data=request.data)
 
         if serializer.is_valid():
             if not self.object.check_password(serializer.data.get("old_password")):
