@@ -143,13 +143,11 @@ class ClassLoginApi(APIView):
                     }
                     return Response(
                         services.success_response(status_code=status.HTTP_200_OK, data=response,
-                                              msg='User login Successfully'), status=status.HTTP_200_OK)
-
-
+                                                  msg='User login Successfully'), status=status.HTTP_200_OK)
                 else:
                     return Response(
                         services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                                  msg="Invalid Payload", errors=self.serializer_class.errors),
+                                                  msg="Invalid Credentials"),
                         status=status.HTTP_400_BAD_REQUEST)
 
             else:
@@ -162,7 +160,7 @@ class ClassLoginApi(APIView):
         else:
             return Response(
                 services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                          msg="User login fail"),
+                                          msg="Invalid Credentials"),
                 status=status.HTTP_400_BAD_REQUEST)
 
 
