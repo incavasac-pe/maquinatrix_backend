@@ -276,7 +276,6 @@ class SendCode(APIView):
 
 
 class ChangePassword(APIView):
-    permission_classes = (IsAuthenticated,)
 
     def post(self, request):
         data = request.data
