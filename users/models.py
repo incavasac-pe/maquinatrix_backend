@@ -8,7 +8,6 @@ DOCUMENT_CHOICES = (
 )
 
 
-
 # Create your models here.
 class Company(models.Model):
 
@@ -46,7 +45,7 @@ class Resetcode(models.Model):
 
 
 class VerificationInfo(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE,unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
     document_type = models.CharField(max_length=200)
     front_pic=models.ImageField(upload_to='images')
     back_pic=models.ImageField(upload_to='images')

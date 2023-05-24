@@ -18,8 +18,6 @@ class AddCompanySerializer(serializers.Serializer):
     is_agreed = serializers.BooleanField(required=True)
 
 
-
-
 class AddIndividualSerializer(serializers.Serializer):
     id_document = serializers.CharField(required=True)
     birth_date = serializers.CharField(required=True)
