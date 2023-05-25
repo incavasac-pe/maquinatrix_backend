@@ -3,7 +3,9 @@ maquinatrix_venv/*
 maq_env/*
 migrations/*
 users/__pycache__/*
+users/migrations/__pycache__/*
 product/__pycache__/*
+product/migrations/__pycache__/*
 maquinatrix_backend/__pycache__/*
 product/productimages/*
 product/profileimages/*
