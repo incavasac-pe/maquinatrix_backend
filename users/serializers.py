@@ -63,7 +63,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class ChangePasswordSerializer(serializers.ModelSerializer):
     code = serializers.IntegerField(required=True)
-    is_expired = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -111,10 +111,10 @@ class VerificationBadgeResponseSerializer(serializers.Serializer):
     is_verified=serializers.BooleanField(required=True)
 
 
-class ChangePasswordSerializer(serializers.Serializer):
-    model = User
 
-    old_password = serializers.CharField(required=True)
+
+class UpdatePasswordSerializer(serializers.Serializer):
+    code = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
 
 

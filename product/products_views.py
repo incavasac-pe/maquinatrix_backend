@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from .models import *
 
 from maquinatrix_backend import services
+from maquinatrix_backend.services import *
 
 
 class CreateBrand(APIView):
@@ -511,6 +512,7 @@ class CreateProduct(APIView):
     def post( self,request):
         data = request.data
         serializer = NewProductSerializer(data=data)
+
         if serializer.is_valid():
             product_pics = serializer.validated_data.get('product_pics')
             brand_id = serializer.validated_data.get('brand_id')
@@ -561,21 +563,12 @@ class CreateProduct(APIView):
             if product_type_obj:
                 product_id_obj = product_type_obj[0].id
                 product_name_obj = product_type_obj[0].name
-            else:
-                return Response(
-                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                              msg="product_id does not present", ),
-                    status=status.HTTP_400_BAD_REQUEST)
+
 
             category_type_obj = ProductCategories.objects.filter(id=category_type_id)
             if category_type_obj:
                 category_id_obj = category_type_obj[0].id
                 category_name_obj = category_type_obj[0].name
-            else:
-                return Response(
-                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,errors=serializer.errors,
-                                              msg="category_id does not present", ),
-                    status=status.HTTP_400_BAD_REQUEST)
 
             if product_name_obj == "rent" and category_name_obj == "machine and vehicles":
                 label_id = serializer.validated_data['product_label_id']

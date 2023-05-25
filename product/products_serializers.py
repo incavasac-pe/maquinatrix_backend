@@ -313,8 +313,8 @@ class CreateProductRentSerializer(serializers.Serializer):
 class NewProductSerializer(serializers.Serializer):
     product_type_id = serializers.CharField(required=True)
     product_pics = serializers.ImageField(required=True)
-    brand_id = serializers.IntegerField(required=True)
-    model_id = serializers.IntegerField(required=True)
+    brand_id = serializers.IntegerField(required=False)
+    model_id = serializers.IntegerField(required=False)
     year_id = serializers.IntegerField(required=True)
     patent = serializers.ImageField(required=True)
     engine_no = serializers.CharField(required=True)
@@ -353,26 +353,27 @@ class NewProductSerializer(serializers.Serializer):
     percentage_amount = serializers.IntegerField(required=True)
     percentage = serializers.IntegerField(required=True)
     product_plan_id = serializers.CharField(required=True)
-    title = serializers.CharField(required=True)
+    title = serializers.CharField(required=False)
     product_category_id=serializers.CharField(required=True)
-    industry_id=serializers.IntegerField(required=True)
-    machine_type_id=serializers.IntegerField(required=True)
+    industry_id=serializers.IntegerField(required=False)
+    machine_type_id=serializers.IntegerField(required=False)
 
 
     def validate(self, data):
 
         if data['fuel'] not in ["diesel", "benzine", "not classified"]:
-            raise serializers.ValidationError("fuel must be diesel or benzine or not classified")
+            raise serializers.ValidationError("fuel must be diesel, benzine or not classified")
 
         if data['product_condition'] not in ["new", "used"]:
             raise serializers.ValidationError("product_condition must be new or used")
 
         if data['transmission'] not in ["manual", "automatic","not classified"]:
-            raise serializers.ValidationError("transmission must be manual or automatic or not classified")
+            raise serializers.ValidationError("transmission must be manual, automatic or not classified")
 
-        brand_id_exists = Brand.objects.filter(id=data['brand_id']).exists()
-        if not brand_id_exists:
-            raise serializers.ValidationError("Brand id not present")
+        if data["brand_id"]:
+            brand_id_exists = Brand.objects.filter(id=data['brand_id']).exists()
+            if not brand_id_exists:
+                raise serializers.ValidationError("Brand id not present")
 
         year_id_exists = Year.objects.filter(id=data['year_id']).exists()
         if not year_id_exists:
@@ -381,10 +382,6 @@ class NewProductSerializer(serializers.Serializer):
         model_id_exists = Model.objects.filter(id=data['model_id']).exists()
         if not model_id_exists:
             raise serializers.ValidationError("model id not present")
-
-        product_type_id_exists = ProductType.objects.filter(id=data['product_type_id']).exists()
-        if not product_type_id_exists:
-            raise serializers.ValidationError("product type id not present")
 
         region_id_exists = Region.objects.filter(id=data['region_id']).exists()
         if not region_id_exists:
@@ -406,13 +403,17 @@ class NewProductSerializer(serializers.Serializer):
         if not product_cat_id_exists:
             raise serializers.ValidationError("product category id not present")
 
-        product_Plan_id_exists = Plan.objects.filter(id=data['product_plan_id']).exists()
-        if not product_Plan_id_exists:
+        product_plan_id_exists = Plan.objects.filter(id=data['product_plan_id']).exists()
+        if not product_plan_id_exists:
             raise serializers.ValidationError("product plan id not present")
 
         product_label_id_exists = Label.objects.filter(id=data['product_label_id']).exists()
         if not product_label_id_exists:
-            raise serializers.ValidationError("label id id not present")
+            raise serializers.ValidationError("label id not present")
+
+        product_type_id_exists = ProductType.objects.filter(id=data['product_type_id']).exists()
+        if not product_type_id_exists:
+            raise serializers.ValidationError("product_type id not present")
 
         return data
 
