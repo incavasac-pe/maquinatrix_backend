@@ -61,7 +61,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ChangePasswordSerializer(serializers.ModelSerializer):
+class ChangePasswordSerializer(serializers.Serializer):
     code = serializers.IntegerField(required=True)
     new_password = serializers.CharField(required=True)
 

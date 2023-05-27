@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from product.products_serializers import *
 from rest_framework.response import Response
 from .models import *
-
+from product.product_creation_services import *
 from maquinatrix_backend import services
 from maquinatrix_backend.services import *
 
@@ -507,272 +507,72 @@ class SaveProductImages(APIView):
 
 
 class CreateProduct(APIView):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def post( self,request):
-        data = request.data
-        serializer = NewProductSerializer(data=data)
+        def post(self, request):
+            data = request.data
+            product_type_id = data.get('product_type_id')
+            category_type_id = data.get('product_category_id')
 
-        if serializer.is_valid():
-            product_pics = serializer.validated_data.get('product_pics')
-            brand_id = serializer.validated_data.get('brand_id')
-            model_id = serializer.validated_data.get('model_id')
-            year_id = serializer.validated_data.get('year_id')
-            patent = serializer.validated_data.get('patent')
-            product_type_id=serializer.validated_data.get('product_type_id')
-            engine_no = serializer.validated_data.get('engine_no')
-            chassis_no = serializer.validated_data.get('chassis_no')
-            net_weight = serializer.validated_data.get('net_weight')
-            power = serializer.validated_data.get('power')
-            displacement = serializer.validated_data.get('displacement')
-            torque = serializer.validated_data.get('torque')
-            mixed_consumption = serializer.validated_data.get('mixed_consumption')
-            transmission = serializer.validated_data.get('transmission')
-            fuel = serializer.validated_data.get('fuel')
-            traction = serializer.validated_data.get('traction')
-            scheduled_maintenance = serializer.validated_data.get('scheduled_maintenance')
-            technical_visit_included = serializer.validated_data.get('technical_visit_included')
-            supply_included = serializer.validated_data.get('supply_included')
-            product_condition = serializer.validated_data.get('product_condition')
-            product_hours = serializer.validated_data.get('product_hours')
-            product_km = serializer.validated_data.get('product_km')
-            has_certificate = serializer.validated_data.get('has_certificate')
-            has_insurance = serializer.validated_data.get('has_insurance')
-            description = serializer.validated_data.get('description')
-            insurance_doc = serializer.validated_data.get('insurance_doc')
-            certificate_date = serializer.validated_data.get('certificate_date')
-            certificate_doc = serializer.validated_data.get('certificate_doc')
-            hourly_rate = serializer.validated_data.get('hourly_rate')
-            minimum_hours = serializer.validated_data.get('minimum_hours')
-            detailed = serializer.validated_data.get('detailed')
-            dispatch_included = serializer.validated_data.get('dispatch_included')
-            operator_included = serializer.validated_data.get('operator_included')
-            maq_lease_contract = serializer.validated_data.get('maq_lease_contract')
-            lease_guaranteed_condition_checklist = serializer.validated_data.get('lease_guaranteed_condition_checklist')
-            percentage_amount = serializer.validated_data.get('percentage_amount')
-            percentage = serializer.validated_data.get('percentage')
-            title = serializer.validated_data.get('title')
-            plan_id = serializer.validated_data['product_plan_id']
-            category_type_id = serializer.validated_data['product_category_id']
-            industry_id = serializer.validated_data['industry_id']
-            machine_type_id = serializer.validated_data['machine_type_id']
-            city_id = serializer.validated_data['city_id']
-            region_id = serializer.validated_data['region_id']
-
-            product_type_obj = ProductType.objects.filter(id=product_type_id)
-            if product_type_obj:
-                product_id_obj = product_type_obj[0].id
-                product_name_obj = product_type_obj[0].name
-
-
-            category_type_obj = ProductCategories.objects.filter(id=category_type_id)
-            if category_type_obj:
-                category_id_obj = category_type_obj[0].id
-                category_name_obj = category_type_obj[0].name
-
-            if product_name_obj == "rent" and category_name_obj == "machine and vehicles":
-                label_id = serializer.validated_data['product_label_id']
-                label_obj = Label.objects.filter(id=label_id).last()
-                if not label_obj:
+            if 'product_type_id' in data:
+                if not data['product_type_id']:
                     return Response(
-                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST, errors=serializer.errors,
-                                                  msg="no label against this id", ),
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="Product type id  can not be empty"),
                         status=status.HTTP_400_BAD_REQUEST)
-                if region_id:
-                    product_obj = Product.objects.create(product_type_id=product_id_obj,
-                                                         product_category_id=category_id_obj,
-                                                         product_pics=product_pics,
-                                                         brand_id=brand_id,
-                                                         model_id=model_id,
-                                                         year_id=year_id,
-                                                         patent=patent,
-                                                         engine_no=engine_no,
-                                                         chassis_no=chassis_no,
-                                                         net_weight=net_weight,
-                                                         power=power,
-                                                         displacement=displacement,
-                                                         torque=torque,
-                                                         mixed_consumption=mixed_consumption,
-                                                         transmission=transmission,
-                                                         fuel=fuel,
-                                                         traction=traction,
-                                                         scheduled_maintenance=scheduled_maintenance,
-                                                         technical_visit_included=technical_visit_included,
-                                                         supply_included=supply_included,
-                                                         product_condition=product_condition,
-                                                         has_certificate=has_certificate,
-                                                         region_id=region_id,
-                                                         has_insurance=has_insurance,
-                                                         city_id=city_id,
-                                                         description=description,
-                                                         product_label=label_obj,
-                                                         plan_id=plan_id,
-                                                         title=title,
-                                                         industry_id=industry_id,
-                                                         machine_type_id=machine_type_id)
-                    product_id=product_obj.id
-                    if product_condition == "used":
-                        Condition.objects.create(product_condition=product_condition,
-                                                 hours_used=product_hours,
-                                                 km_run=product_km)
-                    if has_insurance:
-                        Insurance.objects.create(file=insurance_doc,product_id=product_id)
-                    if has_certificate:
-                        Certificate.objects.create(date=certificate_date,file=certificate_doc,product_id=product_id)
-                    if product_name_obj == "rent":
-                        RentInfo.objects.create(product_id=product_id,
-                                                hourly_rate=hourly_rate,
-                                                minimum_hours =minimum_hours,
-                                                detailed =detailed,
-                                                dispatch_included =dispatch_included,
-                                                operator_included =operator_included,
-                                                maq_lease_contract =maq_lease_contract,
-                                                lease_guaranteed_condition_checklist=lease_guaranteed_condition_checklist,
-                                                percentage_amount =percentage_amount,
-                                                percentage =percentage,
-                                                )
-                    product_pics = dict((request.data).lists())['product_pics']
-                    for img_name in product_pics:
-                            modified_data = modify_input_for_multiple_files(product_id, img_name)
-                            file_serializer = ProductImagesSerializer(data=modified_data)
-                            if file_serializer.is_valid():
-                                product_id = file_serializer.validated_data.get('product_id')
-                                product_pics = file_serializer.validated_data.get('product_pics')
-                                ProductImages.objects.create(product_id=product_id,
-                                                             product_pics=product_pics)
-                            else:
-                                return Response(
-                                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                                              errors=serializer.errors,
-                                                              msg="region_id  does not present", ),
-                                    status=status.HTTP_400_BAD_REQUEST)
-                    response_serializer = ProductSerializer(product_obj)
-                    return Response(
-                        services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
-                                                  msg='Product  added'), status=status.HTTP_201_CREATED, )
-            else:
-                if product_name_obj == "rent" and category_name_obj == "equipments and tools":
-                    region_id = serializer.validated_data['region_id']
-                    region_id_exists = Region.objects.filter(id=region_id).exists()
-                    city_id = serializer.validated_data['city_id']
-                    city_id_obj = Region.objects.filter(id=city_id).exists()
-                    label_id = serializer.validated_data['product_label_id']
-                    label_obj = Label.objects.filter(id=label_id).last()
-                    if not label_obj:
+
+                else:
+                    product_type_obj = ProductType.objects.filter(id=product_type_id)
+                    if product_type_obj:
+                        product_type_name = product_type_obj[0].name
+                    else:
                         return Response(
                             services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                                      msg="no label against this label_id", errors=serializer.errors),
+                                                      msg="Product type id does not exist in the database"),
                             status=status.HTTP_400_BAD_REQUEST)
-                    if region_id_exists:
-                        product_pics = serializer.validated_data.get('product_pics')
-                        brand_id = serializer.validated_data.get('brand_id')
-                        model_id = serializer.validated_data.get('model_id')
-                        year_id = serializer.validated_data.get('year_id')
-                        net_weight = serializer.validated_data.get('net_weight')
-                        power = serializer.validated_data.get('power')
-                        displacement = serializer.validated_data.get('displacement')
-                        torque = serializer.validated_data.get('torque')
-                        mixed_consumption = serializer.validated_data.get('mixed_consumption')
-                        transmission = serializer.validated_data.get('transmission')
-                        fuel = serializer.validated_data.get('fuel')
-                        traction = serializer.validated_data.get('traction')
-                        scheduled_maintenance = serializer.validated_data.get('scheduled_maintenance')
-                        technical_visit_included = serializer.validated_data.get('technical_visit_included')
-                        supply_included = serializer.validated_data.get('supply_included')
-                        product_condition = serializer.validated_data.get('product_condition')
-                        product_hours = serializer.validated_data.get('product_hours')
-                        product_km = serializer.validated_data.get('product_km')
-                        has_certificate = serializer.validated_data.get('has_certificate')
-                        region = serializer.validated_data.get('region_id')
-                        has_insurance = serializer.validated_data.get('has_insurance')
-                        city = serializer.validated_data.get('city_id')
-                        description = serializer.validated_data.get('description')
-                        insurance_doc=serializer.validated_data.get('insurance_doc')
-                        certificate_date = serializer.validated_data.get('certificate_date')
-                        certificate_doc = serializer.validated_data.get('certificate_doc')
-                        hourly_rate = serializer.validated_data.get('hourly_rate')
-                        minimum_hours = serializer.validated_data.get('minimum_hours')
-                        detailed = serializer.validated_data.get('detailed')
-                        dispatch_included = serializer.validated_data.get('dispatch_included')
-                        operator_included = serializer.validated_data.get('operator_included')
-                        maq_lease_contract = serializer.validated_data.get('maq_lease_contract')
-                        lease_guaranteed_condition_checklist = serializer.validated_data.get('lease_guaranteed_condition_checklist')
-                        percentage_amount = serializer.validated_data.get('percentage_amount')
-                        percentage = serializer.validated_data.get('percentage')
-                        title = serializer.validated_data.get('title')
-                        product_obj = Product.objects.create(product_type_id=product_id_obj,
-                                                             product_category_id=category_id_obj,
-                                                             product_pics=product_pics,
-                                                             brand_id=brand_id,
-                                                             model_id=model_id,
-                                                             year_id=year_id,
-                                                             net_weight=net_weight,
-                                                             power=power,
-                                                             displacement=displacement,
-                                                             torque=torque,
-                                                             mixed_consumption=mixed_consumption,
-                                                             transmission=transmission,
-                                                             fuel=fuel,
-                                                             traction=traction,
-                                                             scheduled_maintenance=scheduled_maintenance,
-                                                             technical_visit_included=technical_visit_included,
-                                                             supply_included=supply_included,
-                                                             product_condition=product_condition,
-                                                             has_certificate=has_certificate,
-                                                             region_id=region,
-                                                             has_insurance=has_insurance,
-                                                             city_id=city,
-                                                             description=description,
-                                                             product_label=label_obj,
-                                                             plan_id=plan_id,
-                                                             title=title,
-                                                             industry_id=industry_id,
-                                                             machine_type_id=machine_type_id)
-                        product_id=product_obj.id
-                        if product_condition == "used":
-                            Condition.objects.create(product_condition=product_condition,
-                                                     hours_used=product_hours,
-                                                     km_run=product_km)
-                        if has_insurance:
-                            Insurance.objects.create(file=insurance_doc,product_id=product_id)
-                        if has_certificate:
-                            Certificate.objects.create(date=certificate_date,file=certificate_doc,product_id=product_id)
-                        if product_name_obj == "rent":
-                            RentInfo.objects.create(product_id=product_id,
-                                                    hourly_rate=hourly_rate,
-                                                    minimum_hours =minimum_hours,
-                                                    detailed =detailed,
-                                                    dispatch_included =dispatch_included,
-                                                    operator_included =operator_included,
-                                                    maq_lease_contract =maq_lease_contract,
-                                                    lease_guaranteed_condition_checklist=lease_guaranteed_condition_checklist,
-                                                    percentage_amount =percentage_amount,
-                                                    percentage =percentage,
-                                                    )
-                        product_pics = dict((request.data).lists())['product_pics']
-                        for img_name in product_pics:
-                                modified_data = modify_input_for_multiple_files(product_id, img_name)
-                                file_serializer = ProductImagesSerializer(data=modified_data)
-                                if file_serializer.is_valid():
-                                    product_id = file_serializer.validated_data.get('product_id')
-                                    product_pics = file_serializer.validated_data.get('product_pics')
-                                    ProductImages.objects.create(product_id=product_id,
-                                                                 product_pics=product_pics)
-                                else:
-                                    return Response(
-                                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                                                  msg="Invalid Payload", errors=serializer.errors),
-                                        status=status.HTTP_400_BAD_REQUEST)
-                        response_serializer = ProductSerializer(product_obj)
-                        return Response(
-                            services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
-                                                      msg='Product added'),
-                            status=status.HTTP_201_CREATED, )
-        else:
-            return Response(
-                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                          msg="Product  not added", errors=serializer.errors),
-                status=status.HTTP_400_BAD_REQUEST)
+
+            else:
+                return Response(
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Product type id must be sent in payload"),
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            if 'product_category_id' in data:
+                if not data['product_category_id']:
+                    return Response(
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="Category type id  can not be empty"),
+                        status=status.HTTP_400_BAD_REQUEST)
+                category_type_obj = ProductCategories.objects.filter(id=category_type_id)
+                if category_type_obj:
+                    category_name_obj = category_type_obj[0].name
+                else:
+                    return Response(
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="Category type id does not exist in the database"),
+                        status=status.HTTP_400_BAD_REQUEST)
+
+            else:
+                return Response(
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Category type id must be sent in payload"),
+                    status=status.HTTP_400_BAD_REQUEST)
+
+            if product_type_name == "rent" and category_name_obj == "machine and vehicles":
+                serializer = MachineryAndVehiclesRentSerializer(data=data)
+
+            if serializer.is_valid():
+                product_obj = create_machinery_and_vehicles_rent(serializer)
+                response_serializer = ProductSerializer(product_obj)
+                return Response(
+                        services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
+                                                  msg='Product  added'), status=status.HTTP_201_CREATED )
+            else:
+                return Response(
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Product  not added", errors=serializer.errors),
+                    status=status.HTTP_400_BAD_REQUEST)
 
 
 class CreateProductType(APIView):
