@@ -10,14 +10,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='UpdateEmail',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('token', models.CharField(max_length=200, unique=True)),
-                ('email_address', models.CharField(max_length=200)),
-            ],
-        ),
+        # migrations.CreateModel(
+        #     name='UpdateEmail',
+        #     fields=[
+        #         ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+        #         ('token', models.CharField(max_length=200, unique=True)),
+        #         ('email_address', models.CharField(max_length=200)),
+        #     ],
+        # ),
         migrations.DeleteModel(
             name='EmailVerification',
         ),
