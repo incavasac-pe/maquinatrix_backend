@@ -432,6 +432,123 @@ class MachineryAndVehiclesRentSerializer(serializers.Serializer):
         return data
 
 
+class EquipmentAndToolsRentSerializer(serializers.Serializer):
+    product_type_id = serializers.CharField(required=True)
+    product_pics = serializers.ImageField(required=False)
+    brand_id = serializers.IntegerField(required=True)
+    model_id = serializers.IntegerField(required=True)
+    year_id = serializers.IntegerField(required=False)
+    net_weight = serializers.FloatField(required=False)
+    power = serializers.FloatField(required=False)
+    displacement = serializers.FloatField(required=False)
+    torque = serializers.FloatField(required=False)
+    mixed_consumption = serializers.CharField(required=False)
+    transmission = serializers.CharField(required=False)
+    fuel = serializers.CharField(required=False)
+    traction = serializers.CharField(required=False)
+    scheduled_maintenance = serializers.BooleanField(required=False)
+    technical_visit_included = serializers.BooleanField(required=False)
+    supply_included = serializers.BooleanField(required=False)
+    product_condition = serializers.CharField(required=True)
+    product_hours = serializers.IntegerField(required=False)
+    product_km = serializers.CharField(required=False)
+    has_certificate = serializers.BooleanField(required=False)
+    has_insurance = serializers.BooleanField(required=False)
+    region_id = serializers.CharField(required=False)
+    city_id = serializers.CharField(required=False)
+    description = serializers.CharField(required=False)
+    product_label_id = serializers.IntegerField(required=False)
+    certificate_date = serializers.DateField(required=False)
+    insurance_doc = serializers.ImageField(required=False)
+    certificate_doc = serializers.ImageField(required=False)
+    hourly_rate = serializers.IntegerField(required=False)
+    minimum_hours = serializers.IntegerField(required=False)
+    detailed = serializers.BooleanField(required=False)
+    dispatch_included = serializers.CharField(required=False)
+    operator_included = serializers.CharField(required=False)
+    maq_lease_contract = serializers.CharField(required=False)
+    lease_guaranteed_condition_checklist = serializers.CharField(required=False)
+    percentage_amount = serializers.IntegerField(required=False)
+    percentage = serializers.IntegerField(required=False)
+    product_plan_id = serializers.CharField(required=True)
+    title = serializers.CharField(required=True)
+    product_category_id = serializers.CharField(required=True)
+    industry_id=serializers.IntegerField(required=True)
+    machine_type_id=serializers.IntegerField(required=True)
+    cover_image = serializers.ImageField(required=False)
+
+    def validate(self, data):
+
+        if 'fuel' in data:
+            if data['fuel'] not in ["diesel", "benzine", "not classified"]:
+                raise serializers.ValidationError("fuel must be diesel, benzine or not classified")
+
+        if data['product_condition'] not in ["new", "used"]:
+            raise serializers.ValidationError("product condition must be new or used")
+
+        if 'transmission' in data:
+            if data['transmission'] not in ["manual", "automatic","not classified"]:
+                raise serializers.ValidationError("transmission must be manual, automatic or not classified")
+
+        if 'brand_id' not in data:
+            raise serializers.ValidationError("brand id can not be empty")
+        else:
+            brand_id_exists = Brand.objects.filter(id=data['brand_id']).exists()
+            if not brand_id_exists:
+                raise serializers.ValidationError("This brand id not present in db")
+
+        if 'year_id' in data:
+            year_id_exists = Year.objects.filter(id=data['year_id']).exists()
+            if not year_id_exists:
+                raise serializers.ValidationError("This year id not present in db")
+
+        if 'model_id' in data:
+            model_id_exists = Model.objects.filter(id=data['model_id']).exists()
+            if not model_id_exists:
+                raise serializers.ValidationError("This model id not present in db")
+
+        if 'region_id' in data:
+            region_id_exists = Region.objects.filter(id=data['region_id']).exists()
+            if not region_id_exists:
+                raise serializers.ValidationError("This region id not present in db")
+
+        if 'city_id' in data:
+            city_id_exists = City.objects.filter(id=data['city_id']).exists()
+            if not city_id_exists:
+                raise serializers.ValidationError("This city id not present in db")
+
+        if 'industry_id' in data:
+            industry_id_exists = Industry.objects.filter(id=data['industry_id']).exists()
+            if not industry_id_exists:
+                raise serializers.ValidationError("This industry id not present in db")
+
+        if 'machine_type_id' in data:
+            machine_type_id_exists = MachineType.objects.filter(id=data['machine_type_id']).exists()
+            if not machine_type_id_exists:
+                raise serializers.ValidationError("This machine type id not present in db")
+
+        if 'product_category_id' in data:
+            product_cat_id_exists = ProductCategories.objects.filter(id=data['product_category_id']).exists()
+            if not product_cat_id_exists:
+                raise serializers.ValidationError("This product category id not present in db")
+
+        if 'product_plan_id' in data:
+            product_plan_id_exists = Plan.objects.filter(id=data['product_plan_id']).exists()
+            if not product_plan_id_exists:
+                raise serializers.ValidationError("This product plan id id not present in db")
+
+        if 'product_label_id' in data:
+            product_label_id_exists = Label.objects.filter(id=data['product_label_id']).exists()
+            if not product_label_id_exists:
+                raise serializers.ValidationError("This label id not present in db")
+
+        if 'product_type_id' in data:
+            product_type_id_exists = ProductType.objects.filter(id=data['product_type_id']).exists()
+            if not product_type_id_exists:
+                raise serializers.ValidationError("This product type id not present in db")
+        return data
+
+
 class ProductImagesSerializer(serializers.Serializer):
     product_id = serializers.IntegerField(required=True)
     product_pics = serializers.FileField()

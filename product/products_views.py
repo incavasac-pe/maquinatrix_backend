@@ -507,72 +507,76 @@ class SaveProductImages(APIView):
 
 
 class CreateProduct(APIView):
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
 
     def post( self,request):
-        def post(self, request):
-            data = request.data
-            product_type_id = data.get('product_type_id')
-            category_type_id = data.get('product_category_id')
 
-            if 'product_type_id' in data:
-                if not data['product_type_id']:
-                    return Response(
-                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                                  msg="Product type id  can not be empty"),
-                        status=status.HTTP_400_BAD_REQUEST)
+        data = request.data
+        product_type_id = data.get('product_type_id')
+        category_type_id = data.get('product_category_id')
 
-                else:
-                    product_type_obj = ProductType.objects.filter(id=product_type_id)
-                    if product_type_obj:
-                        product_type_name = product_type_obj[0].name
-                    else:
-                        return Response(
-                            services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                                      msg="Product type id does not exist in the database"),
-                            status=status.HTTP_400_BAD_REQUEST)
-
-            else:
+        if 'product_type_id' in data:
+            if not data['product_type_id']:
                 return Response(
                     services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                              msg="Product type id must be sent in payload"),
+                                              msg="Product type id  can not be empty"),
                     status=status.HTTP_400_BAD_REQUEST)
 
-            if 'product_category_id' in data:
-                if not data['product_category_id']:
-                    return Response(
-                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                                  msg="Category type id  can not be empty"),
-                        status=status.HTTP_400_BAD_REQUEST)
-                category_type_obj = ProductCategories.objects.filter(id=category_type_id)
-                if category_type_obj:
-                    category_name_obj = category_type_obj[0].name
+            else:
+                product_type_obj = ProductType.objects.filter(id=product_type_id)
+                if product_type_obj:
+                    product_type_name = product_type_obj[0].name
                 else:
                     return Response(
                         services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                                  msg="Category type id does not exist in the database"),
+                                                  msg="Product type id does not exist in the database"),
                         status=status.HTTP_400_BAD_REQUEST)
 
+        else:
+            return Response(
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="Product type id must be sent in payload"),
+                status=status.HTTP_400_BAD_REQUEST)
+
+        if 'product_category_id' in data:
+            if not data['product_category_id']:
+                return Response(
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Category type id  can not be empty"),
+                    status=status.HTTP_400_BAD_REQUEST)
+            category_type_obj = ProductCategories.objects.filter(id=category_type_id)
+            if category_type_obj:
+                category_name_obj = category_type_obj[0].name
             else:
                 return Response(
                     services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                              msg="Category type id must be sent in payload"),
+                                              msg="Category type id does not exist in the database"),
                     status=status.HTTP_400_BAD_REQUEST)
 
-            if product_type_name == "rent" and category_name_obj == "machine and vehicles":
-                serializer = MachineryAndVehiclesRentSerializer(data=data)
+        else:
+            return Response(
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="Category type id must be sent in payload"),
+                status=status.HTTP_400_BAD_REQUEST)
 
-            if serializer.is_valid():
-                product_obj = create_machinery_and_vehicles_rent(serializer)
-                response_serializer = ProductSerializer(product_obj)
-                return Response(
-                        services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
-                                                  msg='Product  added'), status=status.HTTP_201_CREATED )
-            else:
-                return Response(
-                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                              msg="Product  not added", errors=serializer.errors),
-                    status=status.HTTP_400_BAD_REQUEST)
+        if product_type_name == "rent" and category_name_obj == "machine and vehicles":
+            serializer = MachineryAndVehiclesRentSerializer(data=data)
+            product_obj = create_machinery_and_vehicles_rent(serializer, data)
+
+        elif product_type_name == "rent" and category_name_obj == "equipments and tools":
+            serializer = EquipmentAndToolsRentSerializer(data=data)
+            product_obj = create_machinery_and_vehicles_rent(serializer, data)
+
+        if serializer.is_valid():
+            response_serializer = ProductSerializer(product_obj)
+            return Response(
+                    services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
+                                              msg='Product  added'), status=status.HTTP_201_CREATED )
+        else:
+            return Response(
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="Product  not added", errors=serializer.errors),
+                status=status.HTTP_400_BAD_REQUEST)
 
 
 class CreateProductType(APIView):
