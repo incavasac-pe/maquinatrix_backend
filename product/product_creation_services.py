@@ -49,6 +49,7 @@ def create_machinery_and_vehicles_rent(serializer,data):
     product_label_id = serializer.validated_data.get('product_label_id')
     city_id = serializer.validated_data.get('city_id')
     region_id = serializer.validated_data.get('region_id')
+
     product_pics = dict((data).lists())['product_pics']
     product_obj = Product.objects.create(product_type_id=product_type_id,
                                          product_category_id=category_type_id,
@@ -76,7 +77,7 @@ def create_machinery_and_vehicles_rent(serializer,data):
                                          has_insurance=has_insurance,
                                          city_id=city_id,
                                          description=description,
-                                         product_label=product_label_id,
+                                         product_label_id=product_label_id,
                                          plan_id=plan_id,
                                          title=title,
                                          industry_id=industry_id,
