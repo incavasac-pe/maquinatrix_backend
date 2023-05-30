@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
         #         ('email_address', models.CharField(max_length=200)),
         #     ],
         # ),
-        migrations.DeleteModel(
-            name='EmailVerification',
-        ),
+#         migrations.DeleteModel(
+#             name='EmailVerification',
+#         ),
     ]
