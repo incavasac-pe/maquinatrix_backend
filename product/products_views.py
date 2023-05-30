@@ -29,6 +29,25 @@ class CreateBrand(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
 
 
+class CreateSize(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post( self,request):
+        data = request.data
+
+        serializer = CreateSizeSerializer(data=data)
+        if serializer.is_valid():
+            size_obj = Size.objects.create(name=serializer.validated_data['new_tyre_size'])
+            response_serializer = SizeSerializer(size_obj)
+            return Response(
+                services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
+                                          msg='New Size added'), status=status.HTTP_201_CREATED)
+        else:
+            return Response(
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="Invalid Payload", errors=serializer.errors),
+                status=status.HTTP_400_BAD_REQUEST)
+
 class CreateModel(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -198,21 +217,21 @@ class CreateProductPlan(APIView):
 
 
 class CreateAllProductPlans(APIView):
-        permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
-        def post(self, request):
-            Plan.objects.all().delete()
-            for plan in plan_types:
-                i = 0
-                Plan.objects.create(name=plan, price=plan_prices[i], is_top_seller=plan_seller[i])
-                i += 1
+    def post(self, request):
+        Plan.objects.all().delete()
+        for plan in plan_types:
+            i = 0
+            Plan.objects.create(name=plan, price=plan_prices[i], is_top_seller=plan_seller[i])
+            i += 1
 
-            prod_plan = Plan.objects.all()
-            response_serializer = ProductPlanSerializer(prod_plan, many=True)
-            return Response(
-                 services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
-                                           msg='Product Plans created'),
-                 status=status.HTTP_201_CREATED)
+        prod_plan = Plan.objects.all()
+        response_serializer = ProductPlanSerializer(prod_plan, many=True)
+        return Response(
+             services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
+                                       msg='Product Plans created'),
+             status=status.HTTP_201_CREATED)
 
 
 class CreateIndustry(APIView):
@@ -507,7 +526,7 @@ class SaveProductImages(APIView):
 
 
 class CreateProduct(APIView):
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def post( self,request):
 
@@ -561,22 +580,140 @@ class CreateProduct(APIView):
 
         if product_type_name == "rent" and category_name_obj == "machine and vehicles":
             serializer = MachineryAndVehiclesRentSerializer(data=data)
-            product_obj = create_machinery_and_vehicles_rent(serializer, data)
+            if serializer.is_valid():
+                product_obj = create_machinery_and_vehicles_rent(serializer, data)
+                response_serializer = ProductSerializer(product_obj)
+                return Response(
+                    services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
+                                              msg='Product added'), status=status.HTTP_201_CREATED)
+            else:
+                return Response(
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Product  not added", errors=serializer.errors),
+                    status=status.HTTP_400_BAD_REQUEST)
 
         elif product_type_name == "rent" and category_name_obj == "equipments and tools":
             serializer = EquipmentAndToolsRentSerializer(data=data)
-            product_obj = create_machinery_and_vehicles_rent(serializer, data)
-
-        if serializer.is_valid():
-            response_serializer = ProductSerializer(product_obj)
-            return Response(
+            if serializer.is_valid():
+                product_obj = create_machinery_and_vehicles_rent(serializer, data)
+                response_serializer = ProductSerializer(product_obj)
+                return Response(
                     services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
-                                              msg='Product  added'), status=status.HTTP_201_CREATED )
-        else:
-            return Response(
-                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-                                          msg="Product  not added", errors=serializer.errors),
-                status=status.HTTP_400_BAD_REQUEST)
+                                              msg='Product added'), status=status.HTTP_201_CREATED)
+            else:
+                return Response(
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Product  not added", errors=serializer.errors),
+                    status=status.HTTP_400_BAD_REQUEST)
+
+        elif product_type_name == "sale" and category_name_obj == "machine and vehicles":
+            serializer = MachineryAndVehiclesSaleSerializer(data=data)
+            if serializer.is_valid():
+                product_pics = dict((data).lists())['product_pics']
+
+                if len(product_pics) < 2:
+                    return Response(
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="Add minimum 2 product pics"),
+                        status=status.HTTP_400_BAD_REQUEST)
+
+                product_obj = create_machinery_and_vehicles_sale(serializer, data)
+                response_serializer = ProductSerializer(product_obj)
+                return Response(
+                    services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
+                                              msg='Product added'), status=status.HTTP_201_CREATED)
+            else:
+                return Response(
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Product  not added", errors=serializer.errors),
+                    status=status.HTTP_400_BAD_REQUEST)
+
+        elif product_type_name == "sale" and category_name_obj == "products and accessories":
+            serializer = ProductAndAccessoriesSaleSerializer(data=data)
+            if serializer.is_valid():
+                product_pics = dict((data).lists())['product_pics']
+
+                if len(product_pics) < 2:
+                    return Response(
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="Add minimum 2 product pics"),
+                        status=status.HTTP_400_BAD_REQUEST)
+                product_obj = create_product_and_accessories_sale(serializer, data)
+                response_serializer = ProductSerializer(product_obj)
+                return Response(
+                    services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
+                                              msg='Product added'), status=status.HTTP_201_CREATED)
+            else:
+                return Response(
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Product  not added", errors=serializer.errors),
+                    status=status.HTTP_400_BAD_REQUEST)
+
+        elif product_type_name == "sale" and category_name_obj == "replacement parts":
+            serializer = ReplacementPartsSaleSerializer(data=data)
+            if serializer.is_valid():
+                product_pics = dict((data).lists())['product_pics']
+
+                if len(product_pics) < 2:
+                    return Response(
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="Add minimum 2 product pics"),
+                        status=status.HTTP_400_BAD_REQUEST)
+                product_obj = create_replacement_parts_and_accessories_sale(serializer, data)
+                response_serializer = ProductSerializer(product_obj)
+                return Response(
+                    services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
+                                              msg='Product added'), status=status.HTTP_201_CREATED)
+            else:
+                return Response(
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Product  not added", errors=serializer.errors),
+                    status=status.HTTP_400_BAD_REQUEST)
+
+        elif product_type_name == "sale" and category_name_obj == "equipments and tools":
+            serializer = EquipmentAndToolsSaleSerializer(data=data)
+            if serializer.is_valid():
+                product_pics = dict((data).lists())['product_pics']
+
+                if len(product_pics) < 2:
+                    return Response(
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="Add minimum 2 product pics"),
+                        status=status.HTTP_400_BAD_REQUEST)
+                product_obj = create_equipment_and_tools_sale(serializer, data)
+                response_serializer = ProductSerializer(product_obj)
+                return Response(
+                    services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
+                                              msg='Product added'), status=status.HTTP_201_CREATED)
+            else:
+                return Response(
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Product not added", errors=serializer.errors),
+                    status=status.HTTP_400_BAD_REQUEST)
+
+        elif product_type_name == "sale" and category_name_obj == "tires":
+
+            serializer = TyreSerializer(data=data)
+            if serializer.is_valid():
+                product_pics = dict((data).lists())['product_pics']
+
+                if len(product_pics) < 2:
+                    return Response(
+                        services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                                  msg="Add minimum 2 product pics"),
+                        status=status.HTTP_400_BAD_REQUEST)
+                else:
+                    product_obj = create_tyres_sale(serializer, data)
+                    response_serializer = ProductSerializer(product_obj)
+                    return Response(
+                        services.success_response(status_code=status.HTTP_201_CREATED,
+                                                  data=response_serializer.data,
+                                                  msg='Product added'), status=status.HTTP_201_CREATED)
+            else:
+                return Response(
+                    services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                              msg="Product  not added", errors=serializer.errors),
+                    status=status.HTTP_400_BAD_REQUEST)
 
 
 class CreateProductType(APIView):
@@ -691,3 +828,21 @@ class CreateAllProductLabel(APIView):
                 services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
                                           msg='Product labels created'),
                 status=status.HTTP_201_CREATED)
+# class CreateSize(APIView):
+#     # permission_classes = (IsAuthenticated,)
+#
+#     def post( self,request):
+#         data = request.data
+#
+#         serializer = CreateSizeSerializer(data=data)
+#         if serializer.is_valid():
+#             brand_obj = Brand.objects.create(name=serializer.validated_data['new_brand_name'].lower())
+#             response_serializer = BrandSerializer(brand_obj)
+#             return Response(
+#                 services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
+#                                           msg='New brand added'), status=status.HTTP_201_CREATED)
+#         else:
+#             return Response(
+#                 services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+#                                           msg="Invalid Payload", errors=serializer.errors),
+#                 status=status.HTTP_400_BAD_REQUEST)

@@ -18,6 +18,8 @@ urlpatterns = [
     path('get-all-machine-types/', GetAllMachineTypes.as_view()),
     path('get-categories-by-product-type-id/', GetCategoriesByProductTypeId.as_view()),
 
+    path('create-size/', CreateSize.as_view()),
+
     path('create-plan/', CreateProductPlan.as_view()),
     path('get-all-plans/', GetAllPlans.as_view()),
     path('create-all-plans/', CreateAllProductPlans.as_view()),

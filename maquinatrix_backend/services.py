@@ -27,7 +27,7 @@ def failure_response(status_code=None, errors=None, msg='Operation Failure'):
     return response
 
 
-sale_categories = ["machine and vehicles","equipments and tools", "product and accessories","requests","tire"]
+sale_categories = ["machine and vehicles","equipments and tools", "products and accessories","replacement parts","tires"]
 rent_categories = ["machine and vehicles","equipments and tools"]
 
 product_types = ["rent","sale"]

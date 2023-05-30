@@ -6,6 +6,10 @@ class Brand(models.Model):
     name = models.CharField(max_length=30,unique=True)
 
 
+class Size(models.Model):
+    name = models.IntegerField()
+
+
 class Model(models.Model):
     brand = models.ForeignKey(Brand,on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
@@ -93,6 +97,7 @@ class Product(models.Model):
     product_label = models.ForeignKey(Label, on_delete=models.CASCADE,null=True)
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
+    part_number = models.CharField(max_length=20,null=True)
 
 
 class Condition(models.Model):
@@ -100,6 +105,31 @@ class Condition(models.Model):
     product_condition = models.CharField(max_length=30,null=True)
     hours_used = models.CharField(max_length=10,null=True)
     km_run = models.CharField(max_length=30,null=True)
+
+
+class TyresInfo(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    size = models.ForeignKey(Size,null=True, on_delete=models.CASCADE)
+    section_width = models.IntegerField()
+    aspect_ratio = models.CharField(max_length=10)
+    tire_diameter = models.FloatField()
+    outside_diameter = models.FloatField()
+    load_index = models.FloatField()
+    speed_index = models.FloatField()
+    maximum_load = models.FloatField(null=True)
+    maximum_speed = models.FloatField(null=True)
+    utqg = models.CharField(max_length=30)
+    wear_rate = models.CharField(max_length=10)
+    traction_index = models.CharField(max_length=30,null=True)
+    temperature_index = models.CharField(max_length=10, null=True)
+    type_of_construction = models.CharField(max_length=30, null=True)
+    is_run_flat = models.BooleanField(null=True)
+    terrain_type_condition = models.CharField(max_length=30, null=True)
+    terrain_type_technology = models.CharField(max_length=30, null=True)
+    tread_design_technology = models.CharField(max_length=30, null=True)
+    type_of_service_condition = models.CharField(max_length=30)
+    vehicle_type_condition = models.CharField(max_length=30)
+    season_condition = models.CharField(max_length=10, null=True)
 
 
 class Insurance(models.Model):
@@ -142,5 +172,12 @@ class RentDetailed(models.Model):
 class ProductImages(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     product_pics = models.ImageField(upload_to='product-images')
+
+
+class SalesInfo(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    dispatch_included = models.BooleanField(default=False)
+    product_price = models.IntegerField(null=False)
+
 
 
