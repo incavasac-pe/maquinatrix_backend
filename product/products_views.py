@@ -828,21 +828,19 @@ class CreateAllProductLabel(APIView):
                 services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
                                           msg='Product labels created'),
                 status=status.HTTP_201_CREATED)
-# class CreateSize(APIView):
-#     # permission_classes = (IsAuthenticated,)
-#
-#     def post( self,request):
-#         data = request.data
-#
-#         serializer = CreateSizeSerializer(data=data)
-#         if serializer.is_valid():
-#             brand_obj = Brand.objects.create(name=serializer.validated_data['new_brand_name'].lower())
-#             response_serializer = BrandSerializer(brand_obj)
-#             return Response(
-#                 services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
-#                                           msg='New brand added'), status=status.HTTP_201_CREATED)
-#         else:
-#             return Response(
-#                 services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
-#                                           msg="Invalid Payload", errors=serializer.errors),
-#                 status=status.HTTP_400_BAD_REQUEST)
+
+class get_product_by_id(APIView):
+    permission_classes = (IsAuthenticated,)
+    def get(self,request):
+        data = request.data
+        user_id = data['user_id']
+        product = Product.objects.filter(user_id=user_id)
+        serializer = ProductSerializerById(data=data)
+        if serializer.is_valid():
+                response_serializer = ProductSerializer(product, many=True)
+                return Response( data=response_serializer.data ,status=200)
+        else:
+            return Response(
+                services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
+                                          msg="product  not added", errors=serializer.errors),
+                                          status=status.HTTP_400_BAD_REQUEST)

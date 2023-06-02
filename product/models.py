@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Brand(models.Model):
@@ -63,7 +63,7 @@ class ProductCategories(models.Model):
 
 
 class Product(models.Model):
-
+    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
     status = models.CharField(default="draft",max_length=20)
     product_type = models.ForeignKey(ProductType, on_delete=models.CASCADE)
     machine_type = models.ForeignKey(MachineType, on_delete=models.CASCADE)

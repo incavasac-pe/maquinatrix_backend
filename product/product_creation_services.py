@@ -53,6 +53,7 @@ def create_machinery_and_vehicles_rent(serializer,data):
     product_label_id = serializer.validated_data.get('product_label_id')
     city_id = serializer.validated_data.get('city_id')
     region_id = serializer.validated_data.get('region_id')
+    user_id = serializer.validated_data['user_id']
 
     product_pics = dict((data).lists())['product_pics']
     product_obj = Product.objects.create(product_type_id=product_type_id,
@@ -85,7 +86,8 @@ def create_machinery_and_vehicles_rent(serializer,data):
                                          plan_id=plan_id,
                                          title=title,
                                          industry_id=industry_id,
-                                         machine_type_id=machine_type_id)
+                                         machine_type_id=machine_type_id,
+                                         user_id=user_id)
 
     product_id = product_obj.id
     if product_condition:
@@ -153,6 +155,7 @@ def create_machinery_and_vehicles_sale(serializer,data):
     plan_id = serializer.validated_data['product_plan_id']
     category_type_id = serializer.validated_data['product_category_id']
     industry_id = serializer.validated_data['industry_id']
+    user_id = serializer.validated_data['user_id']
     machine_type_id = serializer.validated_data['machine_type_id']
     cover_image = serializer.validated_data['cover_image']
     product_label_id = serializer.validated_data.get('product_label_id')
@@ -163,26 +166,28 @@ def create_machinery_and_vehicles_sale(serializer,data):
     product_obj = Product.objects.create(
         product_type_id=product_type_id, product_category_id=category_type_id, cover_image=cover_image,
         brand_id=brand_id, model_id=model_id, year_id=year_id,
-         patent=patent,
-         engine_no=engine_no,
-         chassis_no=chassis_no,
-         net_weight=net_weight,
-         power=power,
-                                         displacement=displacement,
-                                         torque=torque,
-                                         mixed_consumption=mixed_consumption,
-                                         transmission=transmission,
-                                         fuel=fuel,
-                                         traction=traction,
-                                         product_condition=product_condition,
-                                         region_id=region_id,
-                                         city_id=city_id,
-                                         description=description,
-                                         product_label_id=product_label_id,
-                                         plan_id=plan_id,
-                                         title=title,
-                                         industry_id=industry_id,
-                                         machine_type_id=machine_type_id)
+        patent=patent,
+        engine_no=engine_no,
+        chassis_no=chassis_no,
+        net_weight=net_weight,
+        power=power,
+        displacement=displacement,
+        torque=torque,
+        mixed_consumption=mixed_consumption,
+        transmission=transmission,
+        fuel=fuel,
+        traction=traction,
+        product_condition=product_condition,
+        region_id=region_id,
+        city_id=city_id,
+        description=description,
+        product_label_id=product_label_id,
+        plan_id=plan_id,
+        title=title,
+        industry_id=industry_id,
+        machine_type_id=machine_type_id,
+        user_id=user_id
+)
 
     product_id = product_obj.id
     if product_condition and product_condition == "used":
@@ -224,22 +229,26 @@ def create_product_and_accessories_sale(serializer, data):
     product_price=serializer.validated_data['product_price']
     product_pics = dict((data).lists())['product_pics']
     part_number=serializer.validated_data['part_number']
-    product_obj = Product.objects.create(product_type_id=product_type_id,
-                                         product_category_id=category_type_id,
-                                         cover_image=cover_image,
-                                         brand_id=brand_id,
-                                         model_id=model_id,
-                                         year_id=year_id,
-                                         product_condition=product_condition,
-                                         region_id=region_id,
-                                         city_id=city_id,
-                                         description=description,
-                                         product_label_id=product_label_id,
-                                         plan_id=plan_id,
-                                         title=title,
-                                         industry_id=industry_id,
-                                         machine_type_id=machine_type_id,
-                                         part_number=part_number)
+    user_id = serializer.validated_data['user_id']
+    product_obj = Product.objects.create(
+        product_type_id=product_type_id,
+        product_category_id=category_type_id,
+        cover_image=cover_image,
+        brand_id=brand_id,
+        model_id=model_id,
+        year_id=year_id,
+        product_condition=product_condition,
+        region_id=region_id,
+        city_id=city_id,
+        description=description,
+        product_label_id=product_label_id,
+        plan_id=plan_id,
+        title=title,
+        industry_id=industry_id,
+        machine_type_id=machine_type_id,
+        part_number=part_number,
+        user_id=user_id
+    )
 
     product_id = product_obj.id
     if product_price:
@@ -280,24 +289,27 @@ def create_replacement_parts_and_accessories_sale(serializer,data):
     product_price=serializer.validated_data['product_price']
     product_pics = dict((data).lists())['product_pics']
     part_number=serializer.validated_data['part_number']
-    product_obj = Product.objects.create(product_type_id=product_type_id,
-                                         product_category_id=category_type_id,
-                                         cover_image=cover_image,
-                                         brand_id=brand_id,
-                                         model_id=model_id,
-                                         year_id=year_id,
-                                         engine_no=engine_no,
-                                         chassis_no=chassis_no,
-                                         region_id=region_id,
-                                         city_id=city_id,
-                                         description=description,
-                                         product_label_id=product_label_id,
-                                         plan_id=plan_id,
-                                         title=title,
-                                         industry_id=industry_id,
-                                         machine_type_id=machine_type_id,
-                                         part_number=part_number,
-                                         condition=product_condition)
+    user_id = serializer.validated_data['user_id']
+    product_obj = Product.objects.create(
+        product_type_id=product_type_id,
+        product_category_id=category_type_id,
+        cover_image=cover_image,
+        brand_id=brand_id,
+        model_id=model_id,
+        year_id=year_id,
+        engine_no=engine_no,
+        chassis_no=chassis_no,
+        region_id=region_id,
+        city_id=city_id,
+        description=description,
+        product_label_id=product_label_id,
+        plan_id=plan_id,
+        title=title,
+        industry_id=industry_id,
+        machine_type_id=machine_type_id,
+        part_number=part_number,
+        condition=product_condition,
+        user_id=user_id)
 
     product_id = product_obj.id
     if product_price:
@@ -337,22 +349,25 @@ def create_equipment_and_tools_sale(serializer, data):
     region_id = serializer.validated_data.get('region_id')
     product_price=serializer.validated_data['product_price']
     product_pics = dict((data).lists())['product_pics']
-    product_obj = Product.objects.create(product_type_id=product_type_id,
-                                         product_category_id=category_type_id,
-                                         cover_image=cover_image,
-                                         brand_id=brand_id,
-                                         model_id=model_id,
-                                         year_id=year_id,
-                                         fuel=fuel,
-                                         product_condition=product_condition,
-                                         region_id=region_id,
-                                         city_id=city_id,
-                                         description=description,
-                                         product_label_id=product_label_id,
-                                         plan_id=plan_id,
-                                         title=title,
-                                         industry_id=industry_id,
-                                         machine_type_id=machine_type_id,
+    user_id = serializer.validated_data['user_id']
+    product_obj = Product.objects.create(
+        product_type_id=product_type_id,
+        product_category_id=category_type_id,
+        cover_image=cover_image,
+        brand_id=brand_id,
+        model_id=model_id,
+        year_id=year_id,
+        fuel=fuel,
+        product_condition=product_condition,
+        region_id=region_id,
+        city_id=city_id,
+        description=description,
+        product_label_id=product_label_id,
+        plan_id=plan_id,
+        title=title,
+        industry_id=industry_id,
+        machine_type_id=machine_type_id,
+        user_id=user_id
                                          )
 
     product_id = product_obj.id
@@ -417,21 +432,24 @@ def create_tyres_sale(serializer,data):
     vehicle_type_condition = serializer.validated_data.get('vehicle_type_condition')
     season_condition = serializer.validated_data.get('season_condition')
     size_id = serializer.validated_data.get('size_id')
+    user_id = serializer.validated_data['user_id']
 
-    product_obj = Product.objects.create(product_type_id=product_type_id,
-                                         product_category_id=category_type_id,
-                                         cover_image=cover_image,
-                                         brand_id=brand_id,
-                                         model_id=model_id,
-                                         product_condition=product_condition,
-                                         region_id=region_id,
-                                         city_id=city_id,
-                                         description=description,
-                                         product_label_id=product_label_id,
-                                         plan_id=plan_id,
-                                         title=title,
-                                         industry_id=industry_id,
-                                         machine_type_id=machine_type_id
+    product_obj = Product.objects.create(
+        product_type_id=product_type_id,
+        product_category_id=category_type_id,
+        cover_image=cover_image,
+        brand_id=brand_id,
+        model_id=model_id,
+        product_condition=product_condition,
+        region_id=region_id,
+        city_id=city_id,
+        description=description,
+        product_label_id=product_label_id,
+        plan_id=plan_id,
+        title=title,
+        industry_id=industry_id,
+        machine_type_id=machine_type_id,
+        user_id=user_id
                                          )
 
     product_id = product_obj.id
