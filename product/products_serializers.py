@@ -386,7 +386,7 @@ class MachineryAndVehiclesRentSerializer(serializers.Serializer):
     industry_id=serializers.IntegerField(required=True)
     machine_type_id=serializers.IntegerField(required=True)
     cover_image = serializers.ImageField(required=False)
-    user_id = serializers.IntegerField(required=True)
+
 
 
 
@@ -395,10 +395,6 @@ class MachineryAndVehiclesRentSerializer(serializers.Serializer):
         if 'fuel' in data:
             if data['fuel'] not in ["diesel", "benzine", "not classified"]:
                 raise serializers.ValidationError("fuel must be diesel, benzine or not classified")
-
-        user_id_exists = User.objects.filter(id=data['user_id']).exists()
-        if not user_id_exists:
-            raise serializers.ValidationError("This user id not present in db")
 
         if 'product_condition' in data:
             if data['product_condition'] not in ["new", "used"]:
@@ -482,7 +478,6 @@ class MachineryAndVehiclesSaleSerializer(serializers.Serializer):
     machine_type_id = serializers.IntegerField(required=True)
     product_condition = serializers.CharField(required=True)
     product_price = serializers.IntegerField(required=True)
-    user_id = serializers.IntegerField(required=True)
     year_id = serializers.IntegerField(required=False)
     patent = serializers.ImageField(required=False)
     engine_no = serializers.CharField(required=False)
@@ -502,10 +497,6 @@ class MachineryAndVehiclesSaleSerializer(serializers.Serializer):
     cover_image = serializers.ImageField(required=False)
 
     def validate(self, data):
-        user_id_exists = User.objects.filter(id=data['user_id']).exists()
-        if not user_id_exists:
-            raise serializers.ValidationError("This user id not present in db")
-
         if 'fuel' in data:
             if data['fuel'] not in ["diesel", "benzine", "not classified"]:
                 raise serializers.ValidationError("fuel must be diesel, benzine or not classified")
@@ -538,10 +529,6 @@ class MachineryAndVehiclesSaleSerializer(serializers.Serializer):
         region_id_exists = Region.objects.filter(id=data['region_id']).exists()
         if not region_id_exists:
             raise serializers.ValidationError("This region id not present in db")
-
-        user_id_exists = User.objects.filter(id=data['user_id']).exists()
-        if not user_id_exists:
-            raise serializers.ValidationError("This user id not present in db")
 
         city_id_exists = City.objects.filter(id=data['city_id']).exists()
         if not city_id_exists:
@@ -594,13 +581,8 @@ class ProductAndAccessoriesSaleSerializer(serializers.Serializer):
     description = serializers.CharField(required=False)
     product_label_id = serializers.IntegerField(required=False)
     cover_image = serializers.ImageField(required=False)
-    user_id = serializers.IntegerField(required=True)
 
     def validate(self, data):
-        user_id_exists = User.objects.filter(id=data['user_id']).exists()
-        if not user_id_exists:
-            raise serializers.ValidationError("This user id not present in db")
-
         if 'product_condition' in data:
             if data['product_condition'] not in ["new", "used"]:
                 raise serializers.ValidationError("product_condition must be new or used")
@@ -679,13 +661,9 @@ class ReplacementPartsSaleSerializer(serializers.Serializer):
     description = serializers.CharField(required=False)
     product_label_id = serializers.IntegerField(required=False)
     cover_image = serializers.ImageField(required=False)
-    user_id = serializers.IntegerField(required=True)
 
 
     def validate(self, data):
-        user_id_exists = User.objects.filter(id=data['user_id']).exists()
-        if not user_id_exists:
-            raise serializers.ValidationError("This user id not present in db")
 
         if data['product_condition'] not in ["new", "used"]:
             raise serializers.ValidationError("product condition must be new or used")
@@ -763,13 +741,9 @@ class EquipmentAndToolsSaleSerializer(serializers.Serializer):
     fuel = serializers.CharField(required=False)
     product_hours = serializers.IntegerField(required=False)
     product_km = serializers.CharField(required=False)
-    user_id = serializers.IntegerField(required=True)
+
 
     def validate(self, data):
-        user_id_exists = User.objects.filter(id=data['user_id']).exists()
-        if not user_id_exists:
-            raise serializers.ValidationError("This user id not present in db")
-
         if 'fuel' in data:
             if data['fuel'] not in ["diesel", "benzine", "not classified"]:
                 raise serializers.ValidationError("fuel must be diesel, benzine or not classified")
@@ -867,13 +841,8 @@ class TyreSerializer(serializers.Serializer):
     type_of_service_condition = serializers.CharField(required=True)
     vehicle_type_condition = serializers.CharField(required=True)
     season_condition = serializers.CharField(required=False)
-    user_id = serializers.IntegerField(required=True)
 
     def validate(self, data):
-        user_id_exists = User.objects.filter(id=data['user_id']).exists()
-        if not user_id_exists:
-            raise serializers.ValidationError("This user id not present in db")
-
         if data['product_condition'] not in ["new", "used"]:
             raise serializers.ValidationError("product condition must be new or used")
 
@@ -974,13 +943,8 @@ class EquipmentAndToolsRentSerializer(serializers.Serializer):
     percentage_amount = serializers.IntegerField(required=False)
     percentage = serializers.IntegerField(required=False)
     cover_image = serializers.ImageField(required=False)
-    user_id = serializers.IntegerField(required=True)
 
     def validate(self, data):
-        user_id_exists = User.objects.filter(id=data['user_id']).exists()
-        if not user_id_exists:
-            raise serializers.ValidationError("This user id not present in db")
-
         if 'fuel' in data:
             if data['fuel'] not in ["diesel", "benzine", "not classified"]:
                 raise serializers.ValidationError("fuel must be diesel, benzine or not classified")

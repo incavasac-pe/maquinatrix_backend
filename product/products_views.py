@@ -531,6 +531,7 @@ class CreateProduct(APIView):
     def post( self,request):
 
         data = request.data
+        user_id=request.user.id
         product_type_id = data.get('product_type_id')
         category_type_id = data.get('product_category_id')
 
@@ -581,7 +582,7 @@ class CreateProduct(APIView):
         if product_type_name == "rent" and category_name_obj == "machine and vehicles":
             serializer = MachineryAndVehiclesRentSerializer(data=data)
             if serializer.is_valid():
-                product_obj = create_machinery_and_vehicles_rent(serializer, data)
+                product_obj = create_machinery_and_vehicles_rent(serializer, data,user_id)
                 response_serializer = ProductSerializer(product_obj)
                 return Response(
                     services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
@@ -595,7 +596,7 @@ class CreateProduct(APIView):
         elif product_type_name == "rent" and category_name_obj == "equipments and tools":
             serializer = EquipmentAndToolsRentSerializer(data=data)
             if serializer.is_valid():
-                product_obj = create_machinery_and_vehicles_rent(serializer, data)
+                product_obj = create_machinery_and_vehicles_rent(serializer, data,user_id)
                 response_serializer = ProductSerializer(product_obj)
                 return Response(
                     services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
@@ -617,7 +618,7 @@ class CreateProduct(APIView):
                                                   msg="Add minimum 2 product pics"),
                         status=status.HTTP_400_BAD_REQUEST)
 
-                product_obj = create_machinery_and_vehicles_sale(serializer, data)
+                product_obj = create_machinery_and_vehicles_sale(serializer, data,user_id)
                 response_serializer = ProductSerializer(product_obj)
                 return Response(
                     services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
@@ -638,7 +639,7 @@ class CreateProduct(APIView):
                         services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
                                                   msg="Add minimum 2 product pics"),
                         status=status.HTTP_400_BAD_REQUEST)
-                product_obj = create_product_and_accessories_sale(serializer, data)
+                product_obj = create_product_and_accessories_sale(serializer, data,user_id)
                 response_serializer = ProductSerializer(product_obj)
                 return Response(
                     services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
@@ -659,7 +660,7 @@ class CreateProduct(APIView):
                         services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
                                                   msg="Add minimum 2 product pics"),
                         status=status.HTTP_400_BAD_REQUEST)
-                product_obj = create_replacement_parts_and_accessories_sale(serializer, data)
+                product_obj = create_replacement_parts_and_accessories_sale(serializer, data,user_id)
                 response_serializer = ProductSerializer(product_obj)
                 return Response(
                     services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
@@ -680,7 +681,7 @@ class CreateProduct(APIView):
                         services.failure_response(status_code=status.HTTP_400_BAD_REQUEST,
                                                   msg="Add minimum 2 product pics"),
                         status=status.HTTP_400_BAD_REQUEST)
-                product_obj = create_equipment_and_tools_sale(serializer, data)
+                product_obj = create_equipment_and_tools_sale(serializer, data, user_id)
                 response_serializer = ProductSerializer(product_obj)
                 return Response(
                     services.success_response(status_code=status.HTTP_201_CREATED, data=response_serializer.data,
@@ -703,7 +704,7 @@ class CreateProduct(APIView):
                                                   msg="Add minimum 2 product pics"),
                         status=status.HTTP_400_BAD_REQUEST)
                 else:
-                    product_obj = create_tyres_sale(serializer, data)
+                    product_obj = create_tyres_sale(serializer, data,user_id)
                     response_serializer = ProductSerializer(product_obj)
                     return Response(
                         services.success_response(status_code=status.HTTP_201_CREATED,
