@@ -178,6 +178,10 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ProductSerializerById(serializers.Serializer):
+   user_id = serializers.IntegerField(required=True)
+
+
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -384,6 +388,8 @@ class MachineryAndVehiclesRentSerializer(serializers.Serializer):
     cover_image = serializers.ImageField(required=False)
 
 
+
+
     def validate(self, data):
 
         if 'fuel' in data:
@@ -548,6 +554,7 @@ class MachineryAndVehiclesSaleSerializer(serializers.Serializer):
             product_label_id_exists = Label.objects.filter(id=data['product_label_id']).exists()
             if not product_label_id_exists:
                 raise serializers.ValidationError("This label id not present in db")
+
         product_type_id_exists = ProductType.objects.filter(id=data['product_type_id']).exists()
         if not product_type_id_exists:
             raise serializers.ValidationError("This product type id not present in db")
@@ -576,7 +583,6 @@ class ProductAndAccessoriesSaleSerializer(serializers.Serializer):
     cover_image = serializers.ImageField(required=False)
 
     def validate(self, data):
-
         if 'product_condition' in data:
             if data['product_condition'] not in ["new", "used"]:
                 raise serializers.ValidationError("product_condition must be new or used")
@@ -736,6 +742,7 @@ class EquipmentAndToolsSaleSerializer(serializers.Serializer):
     product_hours = serializers.IntegerField(required=False)
     product_km = serializers.CharField(required=False)
 
+
     def validate(self, data):
         if 'fuel' in data:
             if data['fuel'] not in ["diesel", "benzine", "not classified"]:
@@ -836,7 +843,6 @@ class TyreSerializer(serializers.Serializer):
     season_condition = serializers.CharField(required=False)
 
     def validate(self, data):
-
         if data['product_condition'] not in ["new", "used"]:
             raise serializers.ValidationError("product condition must be new or used")
 
@@ -939,7 +945,6 @@ class EquipmentAndToolsRentSerializer(serializers.Serializer):
     cover_image = serializers.ImageField(required=False)
 
     def validate(self, data):
-
         if 'fuel' in data:
             if data['fuel'] not in ["diesel", "benzine", "not classified"]:
                 raise serializers.ValidationError("fuel must be diesel, benzine or not classified")

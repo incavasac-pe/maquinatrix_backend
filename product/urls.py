@@ -46,5 +46,7 @@ urlpatterns = [
     path('get-all-product-type/', GetAllProductTypes.as_view()),
     path('create-product-category/', CreateProductCategory.as_view()),
     path('get-all-categories/', GetAllProductCategories.as_view()),
+    path('get-product-by-id/', get_product_by_id.as_view()),
+
 
 ]
